@@ -3,7 +3,7 @@
 # tested locally with: npx @sveltia/cms-proxy-server  (and uncomment local_backend).
 backend:
   name: github
-  repo: OWNER/REPO # TODO: <github-user>/<repo-name> nach Account-Erstellung eintragen
+  repo: micha2max/dentalia
   branch: main
 # local_backend: true
 
