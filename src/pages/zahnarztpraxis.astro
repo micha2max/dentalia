@@ -1,0 +1,124 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PhotoSlider from '../components/PhotoSlider.astro';
+import { praxis } from '../data/site';
+
+const gallery = [
+  { src: '/wp-content/uploads/2019/02/behandlungsraum_blau.jpg', alt: 'Behandlungsraum mit ruhigen blauen Wänden' },
+  { src: '/wp-content/uploads/2019/02/Rezeption.jpg', alt: 'Empfang und Rezeption unserer Praxis' },
+  { src: '/wp-content/uploads/2019/02/kinderbehandlung_neunkirchen-seelscheid17.jpg', alt: 'Behandlung auf dem Zahnarztstuhl' },
+  { src: '/wp-content/uploads/2019/02/roentgen.jpg', alt: 'Modernes, wandmontiertes Röntgengerät' },
+  { src: '/wp-content/uploads/2019/02/prophylaxe_center.jpg', alt: 'Unser Prophylaxe-Bereich' },
+  { src: '/wp-content/uploads/2019/02/zahnarztpraxis_in_seelscheid_2.jpg', alt: 'Einblick in die Zahnarztpraxis in Seelscheid' },
+  { src: '/wp-content/uploads/2019/02/mitarbeiterin_seelscheid.jpg', alt: 'Unser Team bei der Arbeit' },
+  { src: '/wp-content/uploads/2019/02/patient_zahnreinigung_sm.jpg', alt: 'Zufriedene Patientinnen und Patienten' },
+  { src: '/wp-content/uploads/2019/02/Einweihungsparty_sm.jpg', alt: 'Unser Praxisteam feiert gemeinsam' },
+  { src: '/wp-content/uploads/2019/02/fortbildung_sm-1.jpg', alt: 'Dr. Ehrlichmann bei einer Fortbildung' },
+  { src: '/wp-content/uploads/2019/02/zahnarztpraxis_in_seelscheid_1.jpg', alt: 'Gemütliche Details in unserer Praxis' },
+];
+
+const description =
+  'Unsere Zahnarztpraxis im Herzen von Neunkirchen-Seelscheid: familiär statt Fabrik, seit 1981 für Ihre Zahngesundheit da. Bildergalerie und Einblicke.';
+
+const canonical = `${praxis.url}/zahnarztpraxis`;
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    { '@type': 'AboutPage', '@id': `${canonical}#webpage`, url: canonical, name: 'Unsere Praxis', inLanguage: 'de', isPartOf: { '@id': `${praxis.url}/#website` }, about: { '@id': `${praxis.url}/#praxis` } },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Start', item: praxis.url },
+        { '@type': 'ListItem', position: 2, name: 'Praxis', item: canonical },
+      ],
+    },
+  ],
+};
+---
+
+<BaseLayout title="Unsere Praxis | Zahnarztpraxis Dr. Ehrlichmann" description={description} ogImage={praxis.url + gallery[0].src}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </Fragment>
+
+  <!-- page header -->
+  <section class="page-hero">
+    <div class="wrap">
+      <nav class="breadcrumb" aria-label="Brotkrümel"><a href="/">Start</a> › <span>Praxis</span></nav>
+      <span class="eyebrow">Zahnarztpraxis in Seelscheid</span>
+      <h1>Wir sind für Sie da</h1>
+      <p class="page-lead">Sie finden uns im Herzen von Neunkirchen-Seelscheid – gut erreichbar mit Bus und Auto, mit eigenen Parkplätzen auf unserem Hof. Bei uns erwartet Sie Zahnmedizin für die ganze Familie, von den ersten Milchzähnen bis ins hohe Alter.</p>
+    </div>
+  </section>
+
+  <!-- GALLERY SLIDER -->
+  <section class="section" style="padding-bottom:clamp(28px,4vw,44px)">
+    <div class="wrap">
+      <div class="section-head reveal" style="max-width:48ch">
+        <span class="eyebrow">Einblicke</span>
+        <h2 class="section-title">Ein Blick in unsere Räume</h2>
+        <p class="section-intro">Gemütlich, hell und modern ausgestattet – schauen Sie sich um. Zum Vergrößern auf ein Bild tippen.</p>
+      </div>
+    </div>
+    <div class="wrap" style="max-width:1320px">
+      <PhotoSlider photos={gallery} gallery="praxis" />
+    </div>
+  </section>
+
+  <!-- HISTORY / FAMILIAER -->
+  <section class="section alt">
+    <div class="wrap split">
+      <div class="media reveal"><img src="/wp-content/uploads/2019/02/praxis_seelscheid-big.jpg" alt="Unsere Zahnarztpraxis in Neunkirchen-Seelscheid" loading="lazy" /></div>
+      <div class="reveal">
+        <span class="eyebrow">Familiär, nicht Fabrik</span>
+        <h2 class="section-title">Eine kleine Praxis mit viel Zeit für Sie</h2>
+        <p class="section-intro">Wir sind keine fabrikmäßige Großklinik, sondern eine familiäre Praxis. Vor jeder Behandlung erklären wir Ihnen, was wir machen, wie wir es machen und warum. Unsere Räume sind gemütlich, die Ausstattung modern – für Ihr Wohlbefinden und ein optimales Ergebnis.</p>
+        <ul class="timeline">
+          <li><b>1981 gegründet</b><span>von Dr. Dieter Hollatz – ein vertrauter Partner für Seelscheid.</span></li>
+          <li><b>seit 2007 unter Dr. Natalia Ehrlichmann</b><span>modernisiert und weitergeführt – Gutes blieb erhalten.</span></li>
+          <li><b>über 44 Jahre Erfahrung</b><span>Zahngesundheit für Generationen einer Familie.</span></li>
+        </ul>
+        <div class="cta-row" style="margin-top:1.8rem"><a class="btn btn-cyan" href="/praxisphilosophie">Unsere Philosophie </a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHILOSOPHY QUOTE -->
+  <section class="section tint">
+    <div class="wrap" style="max-width:62ch;margin-inline:auto;text-align:center">
+      <span class="eyebrow" style="justify-content:center">Unser Versprechen</span>
+      <p class="pullquote" style="border:0;padding:0;text-align:center;font-size:clamp(1.5rem,2.8vw,2.1rem);color:var(--navy)">„Gute, solide zahnärztliche Versorgung in einer kleinen, freundlichen Praxis mit familiärem Charakter.“</p>
+      <p style="color:var(--muted);margin-top:1rem">Diese Praxisphilosophie ist seit der Übernahme 2007 unverändert geblieben – damals wie heute.</p>
+    </div>
+  </section>
+
+  <!-- TEAM TEASER -->
+  <section class="section">
+    <div class="wrap split">
+      <div class="reveal">
+        <span class="eyebrow">Menschen, die sich kümmern</span>
+        <h2 class="section-title">Lernen Sie unser Praxisteam kennen</h2>
+        <p class="section-intro">Vom freundlichen Empfang bis zur Behandlung werden Sie bei uns persönlich betreut. Ein eingespieltes Team, das sich Zeit nimmt und Ihnen die Angst vorm Zahnarzt nimmt.</p>
+        <div class="cta-row" style="margin-top:1.8rem">
+          <a class="btn btn-cyan" href="/praxisteam">Zum Praxisteam </a>
+          <a class="btn btn-ghost" href="/terminanfrage">Termin anfragen </a>
+        </div>
+      </div>
+      <div class="media reveal" style="aspect-ratio:5/4"><img src="/wp-content/uploads/2023/03/praxisteam_neunkirchen-seelscheid.jpg" alt="Das Praxisteam der Zahnarztpraxis Dr. Natalia Ehrlichmann" loading="lazy" /></div>
+    </div>
+  </section>
+
+  <section class="cta-band" style="margin-top:clamp(40px,6vw,72px)">
+    <div class="wrap">
+      <h2>Besuchen Sie uns in Seelscheid</h2>
+      <p>Vereinbaren Sie unkompliziert einen Termin – wir freuen uns auf Sie.</p>
+      <div class="cta-row"><a class="btn btn-primary" href="/terminanfrage">Termin anfragen</a><a class="btn btn-light" href={praxis.phoneHref}>{praxis.phone}</a></div>
+    </div>
+  </section>
+
+  <script>
+    import GLightbox from 'glightbox';
+    import 'glightbox/dist/css/glightbox.min.css';
+    GLightbox({ selector: '.glightbox', loop: true, plyr: { css: '', js: '' } });
+  </script>
+</BaseLayout>

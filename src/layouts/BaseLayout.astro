@@ -1,0 +1,269 @@
+---
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+import Icon from '../components/Icon.astro';
+import { praxis, nav } from '../data/site';
+import WebMCPTools from '../components/WebMCPTools.astro';
+import WebMCPSearchForm from '../components/WebMCPSearchForm.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  ogImage?: string;
+  bodyClass?: string;
+  noindex?: boolean;
+}
+const {
+  title,
+  description = 'Zahnarztpraxis Dr. Natalia Ehrlichmann in Neunkirchen-Seelscheid: ehrliche, moderne Zahnmedizin für die ganze Familie, einfühlsam auch für Angstpatienten.',
+  canonical,
+  ogImage = praxis.url + '/wp-content/uploads/2025/11/zahnarztpraxis_neunkirchen-seelscheid_familie.webp',
+  bodyClass = '',
+  noindex = false,
+} = Astro.props;
+
+// 1:1 URLs, no trailing slash. build.format:'file' puts .html on Astro.url.pathname
+// during build — strip it (and index/trailing slash) so canonicals stay clean.
+// The root '/' would otherwise resolve to 'https://dr-ehrlichmann.de/' — strip that
+// trailing slash too so canonical/og:url match the sitemap (no-trailing-slash invariant).
+const path = Astro.url.pathname.replace(/index\.html$/, '').replace(/\.html$/, '').replace(/\/$/, '');
+const canonicalURL = (canonical ?? new URL(path || '/', Astro.site ?? praxis.url).href).replace(/\/$/, '');
+const year = 2026;
+
+// Site-wide JSON-LD: WebSite (+SearchAction) and the Dentist/LocalBusiness.
+const siteSchema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${praxis.url}/#website`,
+      url: praxis.url,
+      name: praxis.name,
+      inLanguage: 'de',
+      publisher: { '@id': `${praxis.url}/#praxis` },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: { '@type': 'EntryPoint', urlTemplate: `${praxis.url}/ratgeber?q={search_term_string}` },
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@type': ['Dentist', 'LocalBusiness'],
+      '@id': `${praxis.url}/#praxis`,
+      name: praxis.name,
+      url: praxis.url,
+      telephone: praxis.phoneFull,
+      email: praxis.email,
+      image: ogImage,
+      logo: { '@type': 'ImageObject', url: praxis.url + praxis.logo.dark },
+      foundingDate: praxis.founded,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: praxis.street,
+        postalCode: praxis.zip,
+        addressLocality: praxis.city,
+        addressRegion: praxis.region,
+        addressCountry: 'DE',
+      },
+      geo: { '@type': 'GeoCoordinates', latitude: praxis.geo.lat, longitude: praxis.geo.lng },
+      openingHoursSpecification: praxis.openingHoursSpec.map((s) => ({
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: s.dayOfWeek,
+        opens: s.opens,
+        closes: s.closes,
+      })),
+      aggregateRating: { '@type': 'AggregateRating', ratingValue: praxis.rating.value, reviewCount: praxis.rating.count },
+      areaServed: { '@type': 'City', name: praxis.city },
+      priceRange: '€€',
+    },
+  ],
+};
+---
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline>document.documentElement.classList.add('js')</script>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'max-snippet:-1, max-image-preview:large, max-video-preview:-1'} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="de_DE" />
+    <meta property="og:site_name" content={praxis.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="theme-color" content="#00bcd4" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <script type="application/ld+json" set:html={JSON.stringify(siteSchema)} />
+    <slot name="head" />
+  </head>
+  <body class={bodyClass}>
+    <!-- topbar -->
+    <div class="topbar">
+      <div class="wrap">
+        <div><span class="open-now">Heute geöffnet</span> bis 18:30<span class="sep">·</span>{praxis.street}, {praxis.zip} {praxis.city}</div>
+        <div>Notdienst {praxis.emergency}</div>
+      </div>
+    </div>
+
+    <!-- header -->
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="/" aria-label={praxis.name}><img src={praxis.logo.dark} alt={praxis.name} width="180" height="44" /></a>
+        <nav class="nav" aria-label="Hauptnavigation">
+          {nav.map((i) => <a href={i.href}>{i.label}</a>)}
+        </nav>
+        <div class="header-cta">
+          <a class="header-phone" href={praxis.phoneHref}>{praxis.phone}</a>
+          <button class="nav-toggle" aria-label="Menü öffnen" aria-expanded="false"><Icon name="menu" size={24} strokeWidth={1.8} /></button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <!-- footer -->
+    <footer class="site-footer">
+      <div class="wrap foot-cols">
+        <div class="foot-brand">
+          <a class="brand" href="/" aria-label={praxis.name}><img src={praxis.logo.white} alt={praxis.name} width="180" height="44" /></a>
+          <p>Ihre Zahnarztpraxis für Neunkirchen-Seelscheid und Umgebung – seit über 45 Jahren.</p>
+        </div>
+        <div>
+          <h2>Leistungen</h2>
+          <a href="/leistungen/zahnaesthetik/prophylaxe">Prophylaxe &amp; PZR</a>
+          <a href="/leistungen/zahnersatz/zahnimplantate">Zahnimplantate</a>
+          <a href="/leistungen/wurzelkanalbehandlung">Wurzelkanalbehandlung</a>
+          <a href="/leistungen/zahnaesthetik">Zahnästhetik</a>
+          <a href="/leistungen/kinderzahnmedizin">Kinderzahnmedizin</a>
+        </div>
+        <div>
+          <h2>Kontakt</h2>
+          <a href={praxis.maps}>{praxis.street}<br />{praxis.zip} {praxis.city}</a>
+          <a href={praxis.phoneHref}>Tel.: {praxis.phone}</a>
+          <a href={praxis.emailHref}>{praxis.email}</a>
+        </div>
+        <div>
+          <h2>Sprechstunden</h2>
+          {praxis.hours.map((h) => <div class="hours-row"><span>{h.days}</span><span>{h.time}</span></div>)}
+        </div>
+      </div>
+      <div class="wrap foot-bottom">
+        <div>© {year} {praxis.legalName}</div>
+        <div><a href="/impressum">Impressum</a> · <a href="/datenschutzerklaerung">Datenschutzerklärung</a></div>
+      </div>
+    </footer>
+
+    <!-- chat bubble (Zipchat placeholder until widget wired) -->
+    <a class="chat-bubble" href={praxis.phoneHref} id="chatBubble" aria-label="Fragen? Dr. Ehrlichmann KI"><span class="av"><Icon name="chat" size={23} strokeWidth={1.8} /></span><span class="lbl">Fragen?<small>Dr. Ehrlichmann KI</small></span></a>
+
+    <!-- back to top -->
+    <button class="to-top" id="toTop" aria-label="Nach oben"><Icon name="arrowUp" size={22} strokeWidth={2} /></button>
+
+    <!-- mobile bottom bar -->
+    <nav class="mobile-bar" aria-label="Schnellzugriff">
+      <a href={praxis.phoneHref}><Icon name="phone" size={22} />Anrufen</a>
+      <a class="accent" href="/terminanfrage"><Icon name="calendar" size={22} />Termin</a>
+      <a href={praxis.maps}><Icon name="pin" size={22} />Anfahrt</a>
+      <a href="#" id="mbar-menu"><Icon name="menu" size={22} strokeWidth={1.8} />Menü</a>
+    </nav>
+
+    <script>
+      (function () {
+        const h = document.querySelector('.site-header');
+        const t = document.querySelector('.nav-toggle');
+        if (h && t)
+          t.addEventListener('click', () => {
+            const open = h.classList.toggle('open');
+            t.setAttribute('aria-expanded', open ? 'true' : 'false');
+          });
+        const mb = document.getElementById('mbar-menu');
+        if (mb && h) mb.addEventListener('click', (e) => { e.preventDefault(); h.classList.toggle('open'); });
+        document.querySelectorAll('.nav a').forEach((a) => a.addEventListener('click', () => h && h.classList.remove('open')));
+
+        const io = new IntersectionObserver(
+          (es) => es.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }),
+          { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+        );
+        document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+        const tt = document.getElementById('toTop');
+        if (tt) {
+          window.addEventListener('scroll', () => { if (window.scrollY > 500) tt.classList.add('show'); else tt.classList.remove('show'); });
+          tt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        }
+      })();
+    </script>
+
+    <!-- Consent-gate controller (2-Klick): wires every .consent-embed on the page
+         (from <ConsentEmbed> or the remark video plugin). Loads the iframe only
+         after a click; remembers per-provider choice in localStorage. -->
+    <script>
+      (function () {
+        const KEY = 'de-consent-embeds';
+        const read = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } };
+        const write = (p) => { try { localStorage.setItem(KEY, JSON.stringify(p)); } catch { /* storage off */ } };
+
+        function activate(fig) {
+          if (fig.dataset.loaded === '1') return;
+          const provider = fig.dataset.provider || 'youtube';
+          const src = fig.dataset.src || '';
+          if (!src) return;
+          const iframe = document.createElement('iframe');
+          iframe.src = src;
+          iframe.title = fig.dataset.title || '';
+          iframe.loading = 'lazy';
+          iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+          iframe.setAttribute('allowfullscreen', '');
+          if (provider !== 'maps') iframe.setAttribute('allow', 'accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen');
+          fig.querySelector('.ce-placeholder')?.remove();
+          fig.appendChild(iframe);
+          fig.dataset.loaded = '1';
+        }
+        const activateAll = (provider) =>
+          document.querySelectorAll('.consent-embed[data-provider="' + provider + '"]').forEach(activate);
+
+        function init() {
+          const figs = document.querySelectorAll('.consent-embed');
+          if (!figs.length) return;
+          const prefs = read();
+          figs.forEach((fig) => {
+            const provider = fig.dataset.provider || 'youtube';
+            if (prefs[provider]) { activate(fig); return; }
+            const btn = fig.querySelector('.ce-load');
+            const always = fig.querySelector('.ce-always');
+            btn && btn.addEventListener('click', () => {
+              if (always && always.checked) { const p = read(); p[provider] = true; write(p); activateAll(provider); }
+              else activate(fig);
+            });
+          });
+        }
+        window.deConsent = {
+          revokeEmbeds() { try { localStorage.removeItem(KEY); } catch {} },
+          grant(provider) { const p = read(); p[provider] = true; write(p); activateAll(provider); },
+        };
+        if (document.readyState !== 'loading') init();
+        else document.addEventListener('DOMContentLoaded', init);
+      })();
+    </script>
+
+    <!-- Agent-ready: WebMCP tools (search_site + get_appointment_info) + declarative form -->
+    <WebMCPTools />
+    <WebMCPSearchForm />
+
+    <!-- TODO: Zipchat AI-Widget — exakten Embed-Snippet aus dem Zipchat-Dashboard einsetzen
+         (Widget-ID: nb6GJQKgoBT35JAPhvUd). Bis dahin dient die Chat-Bubble als Fallback. -->
+  </body>
+</html>

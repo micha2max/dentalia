@@ -1,0 +1,58 @@
+---
+import { Icon } from 'astro-icon/components';
+import type { ServiceArea } from '../data/serviceAreas';
+import type { ServiceType } from '../data/serviceTypes';
+import { generateFaqs } from '../data/seoContent';
+
+interface Props {
+  area: ServiceArea;
+  service?: ServiceType;
+}
+
+const { area, service } = Astro.props;
+
+const faqs = generateFaqs(area, service);
+
+const heading = service
+  ? `Frequently Asked Questions about ${service.name} in ${area.name}`
+  : `Frequently Asked Questions about Plumbing in ${area.name}`;
+
+// Build FAQPage JSON-LD schema
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+};
+---
+
+<section class="mx-auto max-w-3xl px-5 py-16 lg:px-8">
+  <h2 class="font-display text-2xl text-brand-900 sm:text-3xl">
+    {heading}
+  </h2>
+
+  <div class="mt-8 space-y-3">
+    {faqs.map((faq) => (
+      <details class="group rounded-lg border border-stone-200 bg-white transition-colors hover:border-stone-300">
+        <summary class="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-sm font-medium text-stone-800 [&::-webkit-details-marker]:hidden [&::marker]:hidden">
+          <span>{faq.question}</span>
+          <Icon
+            name="lucide:chevron-down"
+            class="size-5 shrink-0 text-stone-400 transition-transform duration-200 group-open:rotate-180"
+          />
+        </summary>
+        <div class="border-t border-stone-100 px-5 py-4 text-sm leading-relaxed text-stone-600">
+          {faq.answer}
+        </div>
+      </details>
+    ))}
+  </div>
+</section>
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

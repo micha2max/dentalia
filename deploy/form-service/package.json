@@ -1,0 +1,17 @@
+{
+  "name": "dentalia-form-service",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Form backend (Termin/Kontakt/Kommentar) for dr-ehrlichmann.de — email + auto-reply + JSONL backup.",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.16"
+  }
+}

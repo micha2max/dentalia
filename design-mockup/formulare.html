@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formulare per E-Mail – Dr. Ehrlichmann (Demo)</title>
+<style>
+  :root{
+    --wp-dark:#1d2327;--wp-blue:#2271b1;--wp-blue-h:#135e96;--wp-text:#3c434a;
+    --wp-bg:#f0f0f1;--wp-border:#c3c4c7;--wp-green:#00a32a;
+    --brand-cyan:#00bcd4;--brand-navy:#2b354b;--brand-green:#8bc34a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--wp-bg);color:var(--wp-text);font-size:13px;line-height:1.5}
+
+  .demo-note{background:linear-gradient(90deg,var(--brand-navy),#1f2738);color:#fff;padding:10px 16px;
+    display:flex;gap:14px;align-items:center;font-size:13px;border-bottom:3px solid var(--brand-cyan)}
+  .demo-note b{color:var(--brand-cyan)}
+  .demo-note .pill{background:var(--brand-cyan);color:#06363d;font-weight:700;padding:2px 8px;border-radius:4px;font-size:11px}
+
+  .adminbar{background:var(--wp-dark);color:#c3c4c7;height:32px;display:flex;align-items:center;padding:0 12px;font-size:13px;gap:16px}
+  .adminbar .home{color:#fff;font-weight:600;display:flex;align-items:center;gap:6px}
+  .adminbar .home::before{content:"🦷"}
+  .adminbar .right{margin-left:auto;display:flex;align-items:center;gap:6px}
+  .adminbar .avatar{width:20px;height:20px;border-radius:50%;background:var(--brand-cyan);display:inline-flex;align-items:center;justify-content:center;color:#06363d;font-weight:700;font-size:11px}
+
+  .main{max-width:1100px;margin:0 auto;padding:20px 22px}
+  h1.title{font-size:23px;font-weight:400;color:#1d2327;margin:4px 0 6px}
+  .crumb{color:#646970;margin-bottom:16px}.crumb b{color:#1d2327}
+
+  /* Flow */
+  .flow{display:flex;gap:10px;align-items:stretch;margin:0 0 22px;flex-wrap:wrap}
+  .flow .step{flex:1;min-width:200px;background:#fff;border:1px solid var(--wp-border);border-radius:6px;padding:13px 15px;box-shadow:0 1px 1px rgba(0,0,0,.04)}
+  .flow .step .n{font-size:11px;font-weight:700;color:#fff;background:var(--brand-cyan);border-radius:20px;padding:2px 9px}
+  .flow .step.you .n{background:var(--brand-green);color:#16320a}
+  .flow .step h4{margin:8px 0 4px;font-size:14px;color:#1d2327}
+  .flow .step p{margin:0;color:#646970;font-size:12.5px}
+  .flow .arrow{align-self:center;color:var(--brand-cyan);font-size:22px;font-weight:700}
+  @media(max-width:760px){.flow .arrow{display:none}}
+
+  .layout{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:start}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}}
+
+  .panel{background:#fff;border:1px solid var(--wp-border);border-radius:6px;box-shadow:0 1px 1px rgba(0,0,0,.04);overflow:hidden}
+  .panel-h{padding:12px 16px;border-bottom:1px solid #f0f0f1;font-size:15px;font-weight:600;color:#1d2327;display:flex;align-items:center;gap:8px}
+
+  /* CF7 tabs */
+  .tabs{display:flex;gap:2px;background:#f6f7f7;border-bottom:1px solid var(--wp-border);padding:0 10px}
+  .tab{padding:10px 16px;cursor:pointer;font-size:13px;color:#50575e;border:1px solid transparent;border-bottom:none}
+  .tab.on{background:#fff;color:#1d2327;font-weight:600;border-color:var(--wp-border);border-radius:5px 5px 0 0;margin-bottom:-1px}
+  .tabpane{padding:16px}
+  .tabpane.hide{display:none}
+
+  /* Form preview */
+  label.f{display:block;font-size:12px;color:#50575e;margin:10px 0 3px;font-weight:600}
+  .inp{width:100%;border:1px solid var(--wp-border);border-radius:4px;padding:8px 10px;font-size:13px;background:#fdfdfd;color:#1d2327}
+  .two{display:flex;gap:10px}.two>div{flex:1}
+  .chkline{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:12px;color:#50575e}
+  .turnstile{margin-top:12px;border:1px solid var(--wp-border);border-radius:4px;padding:8px 10px;display:flex;align-items:center;gap:8px;background:#fafafa;color:#646970;font-size:12px}
+  .submit{margin-top:14px;background:var(--brand-green);color:#16320a;border:none;border-radius:4px;padding:10px 18px;font-weight:700;font-size:13px;cursor:pointer}
+  .hint{font-size:11.5px;color:#646970;margin-top:6px}
+  .field-list .fl{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border:1px solid #f0f0f1;border-radius:4px;margin-bottom:6px;background:#fafafa;font-size:12.5px}
+  .field-list .fl .req{color:#b32d2e;font-weight:700}
+  .field-list .fl a{color:var(--wp-blue);text-decoration:none;font-size:12px}
+
+  /* Mail tab */
+  .mailrow{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center;margin-bottom:10px}
+  .mailrow label{font-size:12px;color:#50575e;font-weight:600}
+  .mailrow .val{font-size:13px}
+  .highlight{outline:2px solid var(--brand-cyan);outline-offset:2px;border-radius:4px}
+  .mailbody{border:1px solid var(--wp-border);border-radius:4px;padding:10px 12px;background:#fdfdfd;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:#1d2327;white-space:pre-wrap;line-height:1.6}
+  .tok{background:#e6f7fa;color:#0e7c8c;border-radius:3px;padding:0 3px}
+  .note2{background:#e6f7fa;border:1px solid #b6e6ee;border-radius:5px;padding:10px 12px;font-size:12.5px;color:#0e5e6b;margin-top:12px}
+  .note2 b{color:#06363d}
+  .save{background:var(--wp-blue);color:#fff;border:1px solid var(--wp-blue-h);border-radius:3px;padding:8px 16px;font-weight:600;font-size:13px;cursor:pointer;margin-top:14px}
+
+  /* Inbox email */
+  .inbox-h{background:#2b354b;color:#fff;padding:10px 14px;font-size:13px;display:flex;align-items:center;gap:8px}
+  .mail{padding:0}
+  .mail .meta{padding:14px 16px;border-bottom:1px solid #f0f0f1}
+  .mail .subj{font-size:16px;font-weight:600;color:#1d2327;margin-bottom:8px}
+  .mail .line{font-size:12.5px;color:#50575e;margin:3px 0}
+  .mail .line b{color:#1d2327}
+  .mail .avatarm{width:34px;height:34px;border-radius:50%;background:var(--brand-cyan);color:#06363d;display:inline-flex;align-items:center;justify-content:center;font-weight:700;margin-right:8px;vertical-align:middle}
+  .mail .body{padding:16px;font-size:13.5px;color:#1d2327;line-height:1.7}
+  .mail .body table{width:100%;border-collapse:collapse;margin-top:6px}
+  .mail .body td{padding:7px 8px;border-bottom:1px solid #f0f0f1;font-size:13px}
+  .mail .body td.k{color:#646970;width:130px}
+  .mail .reply-btn{margin:8px 16px 16px;background:var(--wp-blue);color:#fff;border:none;border-radius:4px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer}
+
+  /* Entries backup */
+  table.wp{width:100%;border-collapse:collapse}
+  table.wp th{background:#f6f7f7;text-align:left;padding:9px 10px;font-size:12.5px;border-bottom:1px solid var(--wp-border)}
+  table.wp td{padding:10px;border-bottom:1px solid #f0f0f1;font-size:12.5px}
+  table.wp tr:hover{background:#f6f7f7}
+  .new-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--brand-green);margin-right:6px}
+
+  .footer-note{margin-top:20px;padding:14px 16px;background:#fff;border:1px solid var(--wp-border);border-radius:6px;color:#50575e;font-size:12.5px;line-height:1.7}
+  .footer-note b{color:var(--brand-navy)}
+  .section-label{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#646970;margin:26px 0 10px;font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="demo-note">
+  <span class="pill">DEMO</span>
+  <span>So <b>erstellst</b> du Formulare und <b>bekommst die Anfragen per E-Mail</b> &mdash; alles in deinem vertrauten WordPress (Contact&nbsp;Form&nbsp;7).</span>
+</div>
+
+<div class="adminbar">
+  <span class="home">Praxis Dr. Ehrlichmann</span>
+  <span class="right"><span>Willkommen, Natalia</span><span class="avatar">NE</span></span>
+</div>
+
+<div class="main">
+  <h1 class="title">Formulare</h1>
+  <div class="crumb">Contact Form 7 &rsaquo; <b>Terminanfrage</b> bearbeiten</div>
+
+  <!-- FLOW -->
+  <div class="flow">
+    <div class="step"><span class="n">1</span><h4>Besucher füllt aus</h4><p>Formular auf der schnellen Astro-Seite &mdash; Name, Telefon, Wunschtermin.</p></div>
+    <div class="arrow">→</div>
+    <div class="step"><span class="n">2</span><h4>WordPress prüft</h4><p>Contact Form 7 filtert Spam (Turnstile + Honeypot) &amp; verarbeitet die Anfrage.</p></div>
+    <div class="arrow">→</div>
+    <div class="step you"><span class="n">3</span><h4>Du bekommst</h4><p>📧 E-Mail an praxis@ &nbsp;·&nbsp; 💾 Eingang gespeichert &nbsp;·&nbsp; ✉️ Auto-Antwort an Patient.</p></div>
+  </div>
+
+  <div class="section-label">① Formular erstellen &amp; E-Mail-Empfänger festlegen</div>
+  <div class="layout">
+    <!-- CF7 editor -->
+    <div class="panel">
+      <div class="panel-h">✉️ Contact Form 7 &mdash; „Terminanfrage“</div>
+      <div class="tabs">
+        <div class="tab on" data-t="t-form">Formular</div>
+        <div class="tab" data-t="t-mail">E-Mail</div>
+        <div class="tab" data-t="t-entries">Eingänge (Backup)</div>
+      </div>
+
+      <!-- Formular tab -->
+      <div class="tabpane" id="t-form">
+        <p class="hint">Hier baust du die Felder zusammen (wie heute). Vorschau, wie der Besucher es sieht:</p>
+        <div class="two">
+          <div><label class="f">Name *</label><input class="inp" placeholder="Vor- und Nachname"></div>
+          <div><label class="f">Telefon *</label><input class="inp" placeholder="0173 …"></div>
+        </div>
+        <label class="f">E-Mail *</label><input class="inp" placeholder="name@beispiel.de">
+        <div class="two">
+          <div><label class="f">Wunschtermin</label><input class="inp" placeholder="z. B. nächste Woche vormittags"></div>
+          <div><label class="f">Versicherung</label><input class="inp" placeholder="gesetzlich / privat"></div>
+        </div>
+        <label class="f">Ihr Anliegen</label><input class="inp" placeholder="Kontrolle, Schmerzen, Beratung …">
+        <div class="chkline"><input type="checkbox"><span>Ich habe die <a style="color:var(--wp-blue)">Datenschutzerklärung</a> gelesen und stimme zu. (Pflicht, DSGVO)</span></div>
+        <div class="turnstile"><input type="checkbox" checked> ☑ Ich bin kein Roboter <span style="margin-left:auto">Cloudflare Turnstile</span></div>
+        <button class="submit">Terminanfrage senden</button>
+        <p class="hint">Felder hinzufügen/umbenennen: oben im Editor &mdash; genau wie du es heute gewohnt bist.</p>
+      </div>
+
+      <!-- Mail tab -->
+      <div class="tabpane hide" id="t-mail">
+        <p class="hint">Diese Seite bestimmt, <b>wohin die Anfrage per E-Mail geht.</b></p>
+        <div class="mailrow"><label>An (Empfänger)</label><div class="val highlight"><b>praxis@dr-ehrlichmann.de</b></div></div>
+        <div class="mailrow"><label>Von</label><div class="val">Praxis-Website &lt;termin@dr-ehrlichmann.de&gt;</div></div>
+        <div class="mailrow"><label>Antwort an</label><div class="val"><span class="tok">[ihre-email]</span> &nbsp;<span class="hint" style="margin:0">→ du antwortest direkt dem Patienten</span></div></div>
+        <div class="mailrow"><label>Betreff</label><div class="val">Neue Terminanfrage von <span class="tok">[name]</span></div></div>
+        <label class="f">Nachrichtentext</label>
+        <div class="mailbody">Neue Terminanfrage über die Website:
+
+Name:        <span class="tok">[name]</span>
+Telefon:     <span class="tok">[telefon]</span>
+E-Mail:      <span class="tok">[ihre-email]</span>
+Wunschtermin:<span class="tok">[wunschtermin]</span>
+Versicherung:<span class="tok">[versicherung]</span>
+Anliegen:    <span class="tok">[anliegen]</span></div>
+        <div class="note2"><b>✉️ Auto-Antwort an den Patienten (Mail 2):</b> optional eine zweite Mail an den Besucher („Wir haben Ihre Anfrage erhalten und melden uns zeitnah“). Empfehle ich &mdash; wirkt professionell.</div>
+        <button class="save">Speichern</button>
+      </div>
+
+      <!-- Entries tab -->
+      <div class="tabpane hide" id="t-entries">
+        <p class="hint">Zusätzlich wird <b>jede Anfrage in der Verwaltung gespeichert</b> (Plugin Flamingo) &mdash; Sicherheitsnetz, falls eine E-Mail mal nicht ankommt.</p>
+        <table class="wp">
+          <thead><tr><th>Absender</th><th>Anliegen</th><th>Eingegangen</th></tr></thead>
+          <tbody>
+            <tr><td><span class="new-dot"></span><b>Sabine Meyer</b><br><span class="hint">0173 …</span></td><td>Schmerzen, Wunschtermin nächste Woche</td><td class="hint">heute, 09:14</td></tr>
+            <tr><td>Thomas Brandt</td><td>Kontrolle + Prophylaxe</td><td class="hint">gestern, 17:42</td></tr>
+            <tr><td>Familie König</td><td>Erstberatung Kinder</td><td class="hint">17.06., 11:20</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Inbox email -->
+    <div>
+      <div class="section-label" style="margin-top:0">② So kommt die Anfrage bei dir an</div>
+      <div class="panel">
+        <div class="inbox-h">📥 Posteingang &mdash; praxis@dr-ehrlichmann.de</div>
+        <div class="mail">
+          <div class="meta">
+            <div class="subj">Neue Terminanfrage von Sabine Meyer</div>
+            <div class="line"><span class="avatarm">PW</span><b>Praxis-Website</b> &lt;termin@dr-ehrlichmann.de&gt;</div>
+            <div class="line"><b>An:</b> praxis@dr-ehrlichmann.de</div>
+            <div class="line"><b>Antwort an:</b> sabine.meyer@example.de</div>
+            <div class="line hint">heute, 09:14</div>
+          </div>
+          <div class="body">
+            Neue Terminanfrage über die Website:
+            <table>
+              <tr><td class="k">Name</td><td><b>Sabine Meyer</b></td></tr>
+              <tr><td class="k">Telefon</td><td>0173 1234567</td></tr>
+              <tr><td class="k">E-Mail</td><td>sabine.meyer@example.de</td></tr>
+              <tr><td class="k">Wunschtermin</td><td>nächste Woche, vormittags</td></tr>
+              <tr><td class="k">Versicherung</td><td>gesetzlich</td></tr>
+              <tr><td class="k">Anliegen</td><td>Pochender Schmerz am Backenzahn</td></tr>
+            </table>
+          </div>
+          <button class="mail-reply reply-btn">↩ Direkt antworten</button>
+        </div>
+      </div>
+      <div class="note2" style="margin-top:14px">
+        <b>Zuverlässige Zustellung:</b> ich richte den Versand über deinen echten Postfach-Server ein (SMTP mit SPF/DKIM auf Hetzner),
+        damit diese Mails im <b>Posteingang</b> landen &mdash; nicht im Spam.
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <b>Kurz:</b> Formulare baust und änderst du in Contact Form 7 (Tab „Formular“), den Empfänger setzt du im Tab „E-Mail“
+    (<b>praxis@dr-ehrlichmann.de</b>). Jede Anfrage kommt per Mail <b>und</b> wird in der Verwaltung gespeichert. Das sind dieselben
+    Formulare wie heute (Termin&nbsp;#471 + Kontakt&nbsp;#913), mit demselben Spamschutz &mdash; nur der öffentliche Auftritt ist neu &amp; schnell.
+  </div>
+</div>
+
+<script>
+  const tabs=document.querySelectorAll('.tab');
+  const panes=document.querySelectorAll('.tabpane');
+  tabs.forEach(t=>t.addEventListener('click',()=>{
+    tabs.forEach(x=>x.classList.remove('on'));t.classList.add('on');
+    panes.forEach(p=>p.classList.toggle('hide',p.id!==t.dataset.t));
+  }));
+  document.querySelector('.mail-reply').addEventListener('click',function(){
+    this.textContent='↪ Antwort geht an sabine.meyer@example.de …';
+    setTimeout(()=>this.textContent='↩ Direkt antworten',2000);
+  });
+</script>
+</body>
+</html>

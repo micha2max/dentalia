@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('ratgeber', (e) => !e.data.draft);
+  const cats = new Map<string, { name: string; posts: any[] }>();
+  for (const p of posts) {
+    if (!cats.has(p.data.categorySlug)) cats.set(p.data.categorySlug, { name: p.data.category, posts: [] });
+    cats.get(p.data.categorySlug)!.posts.push(p);
+  }
+  const allThemen = [...cats].map(([slug, v]) => [slug, v.name] as [string, string]);
+  return [...cats].map(([slug, v]) => ({
+    params: { slug },
+    props: {
+      name: v.name,
+      posts: v.posts.sort((a, b) => +b.data.date - +a.data.date),
+      allThemen,
+      slug,
+    },
+  }));
+}
+
+const { name, posts, allThemen, slug } = Astro.props;
+const description = `Artikel zum Thema „${name}“ – verständlich erklärt von Dr. Natalia Ehrlichmann, Zahnärztin in Neunkirchen-Seelscheid.`;
+---
+
+<BaseLayout title={`${name} | Ratgeber Dr. Ehrlichmann`} description={description}>
+  <section class="section">
+    <div class="wrap">
+      <div class="breadcrumb" style="margin-bottom:1rem"><a href="/">Start</a> › <a href="/ratgeber">Ratgeber</a> › {name}</div>
+      <div class="section-head reveal" style="max-width:46ch">
+        <span class="eyebrow">Thema</span>
+        <h1 class="section-title">{name}</h1>
+      </div>
+
+      <div class="themen reveal" style="margin-bottom:2.4rem">
+        <a class="chip" href="/ratgeber">Alle</a>
+        {allThemen.map(([s, n]) => <a class="chip" href={`/thema/${s}`} style={s === slug ? 'background:var(--c500);color:#fff' : ''}>{n}</a>)}
+      </div>
+
+      <div class="blog-grid reveal">
+        {posts.map((p) => (
+          <a class="card" href={`/ratgeber/${p.id}`}>
+            <div class="card-media"><img src={p.data.hero ?? '/wp-content/uploads/2019/01/kinderzahnmedizin.jpg'} alt={p.data.heroAlt ?? p.data.title} loading="lazy" /></div>
+            <div class="card-body"><span class="chip">{p.data.category}</span><h2 class="card-title">{p.data.title}</h2><p class="card-text">{p.data.description}</p><span class="card-link arrow">Weiterlesen </span></div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

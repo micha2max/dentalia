@@ -1,0 +1,66 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { praxis } from '../../data/site';
+import tagsData from '../../data/tags.json';
+
+// Schlagwort (tag) archives — URLs preserved 1:1 as /schlagwort/<slug>.
+// Tags come from src/data/tags.json (migrated via scripts/migrate-tags.mjs),
+// keyed by WP post id (= ratgeber legacyId); content .md files stay untouched.
+export async function getStaticPaths() {
+  const posts = await getCollection('ratgeber', (e) => !e.data.draft);
+  const byPost: Record<string, string[]> = (tagsData as any).byPost;
+  const tags: { name: string; slug: string; count: number }[] = (tagsData as any).tags;
+  const allTags = tags.map((t) => [t.slug, t.name] as [string, string]);
+
+  return tags.map((t) => {
+    const tagged = posts
+      .filter((p) => (byPost[String(p.data.legacyId)] ?? []).includes(t.slug))
+      .sort((a, b) => +b.data.date - +a.data.date);
+    return { params: { tag: t.slug }, props: { name: t.name, slug: t.slug, posts: tagged, allTags } };
+  });
+}
+
+const { name, slug, posts, allTags } = Astro.props;
+const description = `Alle Ratgeber-Artikel zum Schlagwort „${name}“ – verständlich erklärt von Dr. Natalia Ehrlichmann, Zahnärztin in Neunkirchen-Seelscheid.`;
+const canonical = new URL(`/schlagwort/${slug}`, praxis.url).href;
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  '@id': `${canonical}#webpage`,
+  url: canonical,
+  name: `Schlagwort: ${name}`,
+  inLanguage: 'de',
+  isPartOf: { '@id': `${praxis.url}/#website` },
+};
+---
+
+<BaseLayout title={`${name} | Schlagwort – Ratgeber Dr. Ehrlichmann`} description={description}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </Fragment>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="breadcrumb" style="margin-bottom:1rem"><a href="/">Start</a> › <a href="/ratgeber">Ratgeber</a> › Schlagwort: {name}</div>
+      <div class="section-head reveal" style="max-width:52ch">
+        <span class="eyebrow">Schlagwort</span>
+        <h1 class="section-title">{name}</h1>
+        <p class="section-intro">{posts.length} {posts.length === 1 ? 'Artikel' : 'Artikel'} zu diesem Thema.</p>
+      </div>
+
+      <div class="themen reveal" style="margin-bottom:2.4rem">
+        {allTags.map(([s, n]) => <a class="chip" href={`/schlagwort/${s}`} style={s === slug ? 'background:var(--c500);color:#fff' : ''}>{n}</a>)}
+      </div>
+
+      <div class="blog-grid reveal">
+        {posts.map((p) => (
+          <a class="card" href={`/ratgeber/${p.id}`}>
+            <div class="card-media"><img src={p.data.hero ?? '/wp-content/uploads/2019/01/kinderzahnmedizin.jpg'} alt={p.data.heroAlt ?? p.data.title} loading="lazy" /></div>
+            <div class="card-body"><span class="chip">{p.data.category}</span><h2 class="card-title">{p.data.title}</h2><p class="card-text">{p.data.description}</p><span class="card-link arrow">Weiterlesen </span></div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

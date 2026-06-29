@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { team } from '../../data/team';
+const description =
+  'Lernen Sie das Team der Zahnarztpraxis Dr. Natalia Ehrlichmann in Neunkirchen-Seelscheid kennen – persönlich, erfahren und für Sie da.';
+---
+
+<BaseLayout title="Praxisteam | Zahnarztpraxis Dr. Ehrlichmann" description={description}>
+  <section class="section">
+    <div class="wrap">
+      <div class="breadcrumb" style="margin-bottom:1rem"><a href="/">Start</a> › Praxisteam</div>
+      <div class="section-head center reveal">
+        <span class="eyebrow" style="justify-content:center">Unser Team</span>
+        <h1 class="section-title">Menschen, die sich kümmern</h1>
+        <p class="section-intro">Bei uns werden Sie persönlich betreut – von der Begrüßung am Empfang bis zur Behandlung.</p>
+      </div>
+      <div class="team-grid reveal">
+        {team.map((m) => (
+          <a class="member" href={`/praxisteam/${m.slug}`}>
+            <div class="member-photo"><img src={m.photo} alt={m.name} loading="lazy" /></div>
+            <h2>{m.name}</h2><span>{m.role}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

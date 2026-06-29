@@ -1,0 +1,188 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { praxis } from '../data/site';
+import { cardImg } from '../lib/card-image.mjs';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  const DEDICATED = new Set(['/ratgeber', '/zahnarztpraxis']); // have their own route files
+  return pages
+    .filter((e) => !DEDICATED.has(e.data.path))
+    .map((entry) => ({ params: { slug: entry.data.path.replace(/^\//, '') }, props: { entry, all: pages } }));
+}
+
+const { entry, all } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+
+// Curated, clean one-liners for the services grid (taste: intentional copy, not WP dump).
+const SERVICE_META: Record<string, string> = {
+  '/leistungen/kinderzahnmedizin': 'Altersgerechte, geduldige Behandlung – damit Kinder gern zum Zahnarzt kommen.',
+  '/leistungen/zahnaesthetik': 'Schöne, natürliche Zähne: Prophylaxe, Bleaching und ästhetische Korrekturen.',
+  '/leistungen/zahngesundheit': 'Zahnerhalt mit modernen, zahnfarbenen Füllungen – amalgamfrei.',
+  '/leistungen/zahnersatz': 'Kronen, Brücken und Implantate – fester, ästhetischer Zahnersatz.',
+  '/leistungen/parodontitisbehandlung': 'Gesundes Zahnfleisch als sicheres Fundament für feste Zähne.',
+  '/leistungen/wurzelkanalbehandlung': 'Den eigenen Zahn erhalten – modern, präzise und schonend.',
+  '/leistungen/zahnersatz/zahnkronen': 'Stabiler, natürlich aussehender Schutz für stark geschädigte Zähne.',
+  '/leistungen/zahnersatz/zahnbruecken': 'Lückenlos lächeln – festsitzender Ersatz für fehlende Zähne.',
+  '/leistungen/zahnersatz/zahnimplantate': 'Feste, natürlich aussehende Wurzeln für echten Zahnersatz.',
+  '/leistungen/zahnaesthetik/prophylaxe': 'Professionelle Zahnreinigung, die Karies und Parodontitis vorbeugt.',
+  '/leistungen/zahnaesthetik/zahnreinigung': 'Gründliche Reinigung für ein spürbar glattes, frisches Gefühl.',
+  '/leistungen/zahnaesthetik/zahnaufhellung': 'Schonendes Bleaching für sichtbar hellere Zähne.',
+  '/leistungen/zahngesundheit/fuellungen': 'Hochwertige, zahnfarbene Füllungen, die kaum auffallen.',
+};
+const FALLBACK_IMG = '/wp-content/uploads/2019/02/behandlungsraum_blau.jpg';
+const cardDesc = (c: any) => SERVICE_META[c.data.path] ?? c.data.description ?? '';
+
+// Curated copy where the migrated frontmatter description is a raw WP dump
+// (e.g. "Brücken … Mehr Info … ZAHNERHALTUNG"). Used for BOTH the visible hub
+// lead and the meta description. Re-migration-safe (lives in code, not content).
+const PAGE_DESC: Record<string, string> = {
+  '/leistungen/zahngesundheit': 'Zahnerhalt in unserer Praxis in Neunkirchen-Seelscheid: zahnfarbene Füllungen, Kronen und Brücken – damit Ihre Zähne gesund und schön bleiben.',
+};
+const cleanDesc = PAGE_DESC[d.path] ?? d.description;
+const description = cleanDesc ?? `${d.title} – Zahnarztpraxis Dr. Natalia Ehrlichmann in Neunkirchen-Seelscheid. Termin: ${praxis.phone}.`;
+
+const crumbs = [{ name: 'Start', path: '/' }];
+if (d.parentPath && d.parentTitle && d.parentPath !== '/') crumbs.push({ name: d.parentTitle, path: d.parentPath });
+crumbs.push({ name: d.title, path: d.path });
+
+const children = all.filter((e) => e.data.parentPath === d.path).sort((a, b) => a.data.path.localeCompare(b.data.path, 'de'));
+const siblings = d.parentPath
+  ? all.filter((e) => e.data.parentPath === d.parentPath && e.data.path !== d.path).sort((a, b) => a.data.title.localeCompare(b.data.title, 'de'))
+  : [];
+
+// Sidebar "Weitere Leistungen" — parent overview + sibling services, with thumbnails.
+const parentEntry = d.parentPath ? all.find((e) => e.data.path === d.parentPath) : null;
+const relatedSvc = [
+  ...(parentEntry ? [{ href: parentEntry.data.path, title: parentEntry.data.title, hero: parentEntry.data.hero, small: 'Übersicht' }] : []),
+  ...siblings.map((s) => ({ href: s.data.path, title: s.data.title, hero: s.data.hero, small: s.data.parentTitle ?? 'Leistung' })),
+];
+
+const isLegal = d.path === '/impressum' || d.path === '/datenschutzerklaerung';
+const isHub = children.length > 0;
+const isLeistung = d.path.startsWith('/leistungen') && !isHub;
+const eyebrow = d.parentTitle ?? (d.path === '/leistungen' ? 'Unsere Leistungen' : 'Zahnarztpraxis Dr. Ehrlichmann');
+
+const canonical = new URL(d.path, praxis.url).href;
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    { '@type': isLeistung || isHub ? 'MedicalWebPage' : 'WebPage', '@id': `${canonical}#webpage`, url: canonical, name: d.title, inLanguage: 'de', isPartOf: { '@id': `${praxis.url}/#website` } },
+    { '@type': 'BreadcrumbList', itemListElement: crumbs.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: c.path === '/' ? praxis.url : new URL(c.path, praxis.url).href })) },
+  ],
+};
+---
+
+<BaseLayout title={`${d.title} | Dr. Ehrlichmann`} description={description} ogImage={d.hero ? praxis.url + d.hero : undefined} noindex={d.noindex}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </Fragment>
+
+  <!-- page header -->
+  <section class="page-hero">
+    <div class="wrap">
+      <nav class="breadcrumb" aria-label="Brotkrümel">
+        {crumbs.map((c, i) => (<>{i > 0 && ' › '}{i < crumbs.length - 1 ? <a href={c.path}>{c.name}</a> : <span>{c.name}</span>}</>))}
+      </nav>
+      <span class="eyebrow">{eyebrow}</span>
+      <h1>{d.title}</h1>
+      {isHub && cleanDesc && <p class="page-lead">{cleanDesc}</p>}
+    </div>
+  </section>
+
+  {isHub && (
+    <section class="section">
+      <div class="wrap">
+        <div class="cards reveal">
+          {children.map((c) => (
+            <a class="card" href={c.data.path}>
+              <div class="card-media"><img src={cardImg(c.data.hero ?? FALLBACK_IMG)} alt={c.data.heroAlt ?? c.data.title} width="750" height="500" loading="lazy" /></div>
+              <div class="card-body">
+                <h2 class="card-title">{c.data.title}</h2>
+                <p class="card-text">{cardDesc(c)}</p>
+                <span class="card-link arrow">Mehr erfahren </span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {isLeistung && (
+    <div class="article" style="padding-top:clamp(28px,4vw,48px)">
+      <div class="article-layout">
+        <article class="article-main leistung-main">
+          {d.hero && <img class="lead" src={d.hero} alt={d.heroAlt ?? d.title} width="1140" height="641" loading="eager" fetchpriority="high" decoding="async" />}
+          <div class="article-body"><Content /></div>
+        </article>
+        <aside class="sidebar">
+          <div class="widget cta-w">
+            <div class="wic"><Icon name="calendar" size={26} /></div>
+            <h2>Termin vereinbaren</h2>
+            <p>Wir beraten Sie gern persönlich zu dieser Behandlung.</p>
+            <a class="num" href={praxis.phoneHref}><Icon name="phone" size={20} strokeWidth={2} />{praxis.phone}</a>
+            <a class="btn btn-primary" href="/terminanfrage">Termin anfragen</a>
+          </div>
+
+          <div class="widget hours-w">
+            <h2 class="widget-title"><Icon name="clock" size={16} strokeWidth={2} /> Öffnungszeiten</h2>
+            <div class="open-line">Heute geöffnet bis 18:30 Uhr</div>
+            {praxis.hours.map((h) => <div class="row"><span>{h.days}</span><b>{h.time}</b></div>)}
+          </div>
+
+          {relatedSvc.length > 0 && (
+            <div class="widget">
+              <h2 class="widget-title"><Icon name="tooth" size={16} /> Weitere Leistungen</h2>
+              <div class="pop">
+                {relatedSvc.map((s) => (
+                  <a href={s.href}>
+                    <span class="thumb"><img src={cardImg(s.hero ?? FALLBACK_IMG)} alt={s.title} loading="lazy" /></span>
+                    <div><span class="pop-t">{s.title}</span><small>{s.small}</small></div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div class="widget contact-w">
+            <h2 class="widget-title"><Icon name="pin" size={16} /> Kontakt &amp; Anfahrt</h2>
+            <div class="line"><Icon name="pin" size={18} strokeWidth={1.8} /><span><b>{praxis.street}</b><br />{praxis.zip} {praxis.city}</span></div>
+            <div class="line"><Icon name="phone" size={18} strokeWidth={1.8} /><span><b>{praxis.phone}</b></span></div>
+            <div class="actions">
+              <a class="btn btn-ghost" href={praxis.maps} target="_blank" rel="noopener">Route planen</a>
+              <a class="btn btn-primary" href="/terminanfrage">Termin</a>
+            </div>
+            <div class="notdienst">Außerhalb der Sprechzeiten:<b>Notdienst KZV {praxis.emergency}</b></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  )}
+
+  {!isHub && !isLeistung && (
+    <div class="article" style="padding-top:clamp(28px,4vw,48px)">
+      {d.hero && !isLegal && <div class="lead-img"><img src={d.hero} alt={d.heroAlt ?? d.title} width="1000" height="563" loading="eager" fetchpriority="high" decoding="async" /></div>}
+      <div class="article-wrap">
+        <div class="article-body"><Content /></div>
+      </div>
+    </div>
+  )}
+
+  {!isLegal && (
+    <section class="cta-band" style="margin-top:clamp(56px,7vw,88px)">
+      <div class="wrap">
+        <h2>{isHub || isLeistung ? 'Haben Sie Fragen zu Ihrer Behandlung?' : 'Lernen Sie unsere Praxis kennen'}</h2>
+        <p>Vereinbaren Sie unkompliziert einen Termin in Ihrer Zahnarztpraxis in Neunkirchen-Seelscheid.</p>
+        <div class="cta-row"><a class="btn btn-primary" href="/terminanfrage">Termin anfragen</a><a class="btn btn-light" href={praxis.phoneHref}>{praxis.phone}</a></div>
+      </div>
+    </section>
+  )}
+
+  {(isLeistung || (!isHub && !isLegal)) && (
+    <script>import '../scripts/article-lightbox.js';</script>
+  )}
+</BaseLayout>

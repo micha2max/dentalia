@@ -1,0 +1,60 @@
+---
+interface Crumb {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  crumbs: Crumb[];
+}
+
+const { crumbs } = Astro.props;
+
+// Prepend "Home" automatically
+const allCrumbs: Crumb[] = [{ label: 'Home', href: '/' }, ...crumbs];
+
+// Build BreadcrumbList JSON-LD schema
+// Google spec: the final item should omit the `item` property
+const schemaItems = allCrumbs.map((crumb, index) => {
+  const entry: Record<string, unknown> = {
+    '@type': 'ListItem',
+    position: index + 1,
+    name: crumb.label,
+  };
+  // Only include `item` for crumbs that have an href (not the final one)
+  if (crumb.href) {
+    entry.item = new URL(crumb.href, Astro.site).href;
+  }
+  return entry;
+});
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: schemaItems,
+};
+---
+
+<nav aria-label="Breadcrumb" class="mx-auto max-w-7xl px-5 py-3 lg:px-8">
+  <ol class="flex flex-wrap items-center gap-1.5 text-sm">
+    {allCrumbs.map((crumb, index) => (
+      <li class="flex items-center gap-1.5">
+        {index > 0 && (
+          <span class="text-stone-300" aria-hidden="true">/</span>
+        )}
+        {crumb.href ? (
+          <a
+            href={crumb.href}
+            class="text-stone-500 transition-colors hover:text-stone-700"
+          >
+            {crumb.label}
+          </a>
+        ) : (
+          <span class="text-stone-700">{crumb.label}</span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

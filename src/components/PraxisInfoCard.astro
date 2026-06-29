@@ -1,0 +1,15 @@
+---
+import Icon from './Icon.astro';
+import { praxis } from '../data/site';
+---
+<div class="info-card">
+  <h2>Ihre Praxis vor Ort</h2>
+  <div class="info-row"><Icon name="pin" /><span>{praxis.street}<br />{praxis.zip} {praxis.city}</span></div>
+  <div class="info-row"><Icon name="phone" /><span><b><a href={praxis.phoneHref}>{praxis.phone}</a></b><br />Notdienst {praxis.emergency}</span></div>
+  <div class="info-row"><Icon name="chat" /><a href={praxis.emailHref}>{praxis.email}</a></div>
+</div>
+<div class="widget hours-w">
+  <h2 class="widget-title"><Icon name="clock" size={16} strokeWidth={2} /> Öffnungszeiten</h2>
+  <div class="open-line">Heute geöffnet bis 18:30 Uhr</div>
+  {praxis.hours.map((h) => <div class="row"><span>{h.days}</span><b>{h.time}</b></div>)}
+</div>

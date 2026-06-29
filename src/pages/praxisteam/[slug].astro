@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { team } from '../../data/team';
+import { praxis } from '../../data/site';
+
+export async function getStaticPaths() {
+  return team.map((m) => ({ params: { slug: m.slug }, props: { m } }));
+}
+const { m } = Astro.props;
+const canonical = `${praxis.url}/praxisteam/${m.slug}`;
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  '@id': `${canonical}#person`,
+  name: m.name,
+  jobTitle: m.role.replace(/ · .*/, ''),
+  image: praxis.url + m.photo,
+  worksFor: { '@id': `${praxis.url}/#praxis` },
+  url: canonical,
+};
+---
+
+<BaseLayout title={`${m.name} | Praxisteam Dr. Ehrlichmann`} description={`${m.name} – ${m.role} in der Zahnarztpraxis Dr. Natalia Ehrlichmann, Neunkirchen-Seelscheid.`} ogImage={praxis.url + m.photo}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </Fragment>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="breadcrumb" style="margin-bottom:1.4rem"><a href="/">Start</a> › <a href="/praxisteam">Praxisteam</a> › {m.name}</div>
+      <div class="split">
+        <div class="media reveal" style="aspect-ratio:4/5;max-width:420px"><img src={m.photo} alt={m.name} loading="lazy" /></div>
+        <div class="reveal">
+          <span class="eyebrow">{m.role}</span>
+          <h1 class="section-title">{m.name}</h1>
+          <p class="section-intro" style="margin-top:1rem">{m.bio}</p>
+          <div class="cta-row" style="margin-top:1.8rem">
+            <a class="btn btn-cyan" href="/terminanfrage">Termin vereinbaren</a>
+            <a class="btn btn-ghost" href="/praxisteam">Ganzes Team </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

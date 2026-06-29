@@ -1,0 +1,60 @@
+# Sveltia CMS — friendly web admin for the practice owner to add/edit articles.
+# Connect to GitHub once an account exists (set `repo` below). Until then, can be
+# tested locally with: npx @sveltia/cms-proxy-server  (and uncomment local_backend).
+backend:
+  name: github
+  repo: OWNER/REPO # TODO: <github-user>/<repo-name> nach Account-Erstellung eintragen
+  branch: main
+# local_backend: true
+
+media_folder: public/wp-content/uploads/redaktion
+public_folder: /wp-content/uploads/redaktion
+
+collections:
+  - name: ratgeber
+    label: Ratgeber – Artikel
+    label_singular: Artikel
+    description: Blogartikel des Praxis-Ratgebers. Neue Artikel hier anlegen.
+    folder: src/content/ratgeber
+    create: true
+    slug: '{{slug}}'
+    extension: md
+    format: frontmatter
+    fields:
+      - { label: Titel, name: title, widget: string }
+      - { label: Beschreibung (für Google), name: description, widget: text }
+      - label: Thema
+        name: category
+        widget: select
+        options:
+          - So bleiben Zähne gesund
+          - Zahngesundheit bei Kindern
+          - Wissenswertes
+          - Schöne Zähne & Lächeln
+          - Einblicke in unsere Praxis
+      - label: Thema-Slug (URL)
+        name: categorySlug
+        widget: select
+        options: [gesunde-zaehne, kinderzaehne, wissenswertes, zahnkosmetik, praxiswissen]
+      - { label: Datum, name: date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, format: 'YYYY-MM-DD' }
+      - { label: Aktualisiert, name: updated, widget: datetime, required: false, date_format: 'YYYY-MM-DD', time_format: false, format: 'YYYY-MM-DD' }
+      - { label: Titelbild, name: hero, widget: image, required: false }
+      - { label: Titelbild-Beschreibung (Alt), name: heroAlt, widget: string, required: false }
+      - { label: Lesezeit, name: readingTime, widget: string, required: false }
+      - { label: Inhalt, name: body, widget: markdown }
+
+  - name: pages
+    label: Seiten
+    description: Statische Seiten (Leistungen, Praxis, rechtliche Seiten). URL nicht ändern!
+    folder: src/content/pages
+    create: false
+    extension: md
+    format: frontmatter
+    fields:
+      - { label: Titel, name: title, widget: string }
+      - { label: Beschreibung, name: description, widget: text, required: false }
+      - { label: 'Pfad (URL – nicht ändern!)', name: path, widget: string }
+      - { label: Übergeordnete Seite (Titel), name: parentTitle, widget: string, required: false }
+      - { label: Übergeordnete Seite (Pfad), name: parentPath, widget: string, required: false }
+      - { label: Titelbild, name: hero, widget: image, required: false }
+      - { label: Inhalt, name: body, widget: markdown }

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seite verwalten OHNE WordPress – Dr. Ehrlichmann (Demo)</title>
+<style>
+  :root{
+    --cyan:#00bcd4;--cyan-d:#0097ad;--navy:#2b354b;--navy-d:#1f2738;
+    --green:#00a32a;--ink:#1f2738;--body:#414b59;--muted:#6b7683;
+    --line:#e7edf1;--bg:#f4f7f9;--c50:#e6f7fa;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--body);font-size:14px;line-height:1.55}
+  h1,h2,h3,h4{color:var(--ink);margin:0}
+  code{background:#eef2f5;border-radius:4px;padding:1px 5px;font-size:.85em}
+
+  .demo-note{background:linear-gradient(90deg,var(--navy),#1f2738);color:#fff;padding:12px 18px;display:flex;gap:14px;align-items:center;border-bottom:3px solid var(--cyan);flex-wrap:wrap}
+  .demo-note .pill{background:var(--cyan);color:#06363d;font-weight:700;padding:2px 9px;border-radius:5px;font-size:11px}
+  .demo-note b{color:var(--cyan)}
+
+  .container{max-width:1120px;margin:0 auto;padding:24px 22px}
+  .sec-label{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--cyan-d);font-weight:800;margin:30px 0 12px;display:flex;align-items:center;gap:8px}
+  .sec-label:first-child{margin-top:6px}
+
+  /* ===== CMS app frame (light, NOT WordPress) ===== */
+  .app{display:flex;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 18px 40px -28px rgba(0,150,173,.4);min-height:440px}
+  .side{width:210px;flex:0 0 210px;border-right:1px solid var(--line);padding:14px 12px;background:#fbfdfe}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--ink);font-size:14px;padding:6px 8px 14px}
+  .brand .logo{width:24px;height:24px;border-radius:7px;background:var(--cyan);display:grid;place-items:center;color:#fff;font-size:13px}
+  .nav a{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;color:var(--body);text-decoration:none;cursor:pointer;font-size:13.5px;margin-bottom:2px}
+  .nav a:hover{background:#eef6f8}
+  .nav a.on{background:var(--c50);color:var(--cyan-d);font-weight:700}
+  .nav .ic{width:16px;text-align:center}
+  .nav .small{margin-top:14px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:0 10px 4px;font-weight:700}
+  .side .user{margin-top:18px;border-top:1px solid var(--line);padding-top:12px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+  .side .user .av{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:700;font-size:11px}
+
+  .main{flex:1;padding:18px 20px;min-width:0}
+  .main-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+  .main-h h2{font-size:19px}
+  .btn{border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+  .btn-cyan{background:var(--cyan);color:#fff}
+  .btn-cyan:hover{background:var(--cyan-d)}
+  .btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  .scr{display:none}.scr.on{display:block}
+
+  /* list */
+  .list .row{display:flex;align-items:center;gap:12px;padding:12px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+  .list .row:hover{border-color:var(--cyan)}
+  .list .row .th{width:46px;height:46px;border-radius:8px;background:var(--c50);display:grid;place-items:center;font-size:20px;flex:none}
+  .list .row .t{font-weight:700;color:var(--ink)}
+  .list .row .m{font-size:12px;color:var(--muted)}
+  .list .row .st{margin-left:auto;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:#e8f7ec;color:var(--green)}
+  .list .row .st.draft{background:#fdf3e3;color:#b26200}
+
+  /* editor */
+  .editor{display:flex;gap:18px}
+  .canvas{flex:1;border:1px solid var(--line);border-radius:10px;padding:20px;min-width:0}
+  .lab{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 5px}
+  .lab:first-child{margin-top:0}
+  .inp{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:14px;font-family:inherit;color:var(--ink);background:#fff}
+  .titlein{font-size:22px;font-weight:800;border:none;border-bottom:2px solid var(--line);border-radius:0;padding:4px 0}
+  .rte{border:1px solid var(--line);border-radius:8px}
+  .rte .bar{display:flex;gap:4px;padding:7px 9px;border-bottom:1px solid var(--line);background:#fbfdfe}
+  .rte .bar span{width:28px;height:26px;border-radius:6px;display:grid;place-items:center;font-size:13px;color:var(--ink);cursor:pointer}
+  .rte .bar span:hover{background:#eef6f8}
+  .rte .body{padding:12px;font-size:14.5px;color:var(--ink);line-height:1.7}
+  .dropimg{margin:10px 0;border:2px dashed var(--cyan);border-radius:10px;background:var(--c50);padding:18px;text-align:center;color:var(--cyan-d);font-weight:600;cursor:pointer}
+  .epanel{width:240px;flex:0 0 240px}
+  .pcard{border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin-bottom:12px}
+  .pcard h4{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:9px}
+  .prow{display:flex;justify-content:space-between;font-size:13px;margin:6px 0;color:var(--body)}
+
+  .note{background:var(--c50);border:1px solid #b6e6ee;border-radius:10px;padding:12px 14px;font-size:13px;color:#0e5e6b;margin-top:14px}
+  .note b{color:#06363d}
+
+  /* ===== flow ===== */
+  .flow{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;margin-bottom:6px}
+  .flow .step{flex:1;min-width:190px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:14px}
+  .flow .step .n{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--cyan);color:#fff;font-weight:800;font-size:12px}
+  .flow .step.you .n{background:var(--green)}
+  .flow .step h4{margin:9px 0 5px;font-size:14.5px}
+  .flow .step p{margin:0;font-size:12.5px;color:var(--muted)}
+  .flow .arrow{align-self:center;color:var(--cyan);font-size:20px;font-weight:800}
+  @media(max-width:780px){.flow .arrow{display:none}}
+
+  .grid2{display:grid;grid-template-columns:1.05fr .95fr;gap:16px;align-items:start;margin-top:14px}
+  @media(max-width:860px){.grid2{grid-template-columns:1fr}}
+
+  /* email */
+  .mail{border:1px solid var(--line);border-radius:11px;overflow:hidden}
+  .mail .h{background:var(--navy);color:#fff;padding:9px 14px;font-size:12.5px}
+  .mail .meta{padding:13px 15px;border-bottom:1px solid var(--line)}
+  .mail .subj{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:7px}
+  .mail .li{font-size:12.5px;color:var(--muted);margin:2px 0}.mail .li b{color:var(--ink)}
+  .mail .body{padding:14px 15px}
+  .mail table{width:100%;border-collapse:collapse}
+  .mail td{padding:6px 6px;border-bottom:1px solid var(--line);font-size:13px}
+  .mail td.k{color:var(--muted);width:120px}
+
+  .deliver{border:1px solid var(--line);border-radius:11px;padding:14px 16px}
+  .deliver h4{font-size:14px;margin-bottom:8px}
+  .deliver .d{display:flex;gap:9px;margin:8px 0;font-size:13px}
+  .deliver .d b{color:var(--ink)}
+  .deliver .tag{flex:none;width:62px;font-weight:800;color:var(--cyan-d);font-size:12px;letter-spacing:.04em}
+
+  /* compare */
+  table.cmp{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:11px;overflow:hidden;margin-top:8px}
+  table.cmp th,table.cmp td{padding:11px 13px;text-align:left;font-size:13px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.cmp th{background:#fbfdfe;color:var(--ink);font-weight:800}
+  table.cmp td:first-child{font-weight:700;color:var(--ink);width:200px}
+  .yes{color:var(--green);font-weight:700}.warn{color:#b26200;font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="demo-note">
+  <span class="pill">DEMO</span>
+  <span>So verwaltest du die Seite <b>OHNE WordPress</b> — mit einem schlanken <b>Git-CMS</b> (Inhalte) und einer <b>Formular-Funktion</b> (E-Mail). Beide Teile unten.</span>
+</div>
+
+<div class="container">
+
+  <!-- ===================== TEIL 1: CMS ===================== -->
+  <div class="sec-label">① Inhalte verwalten — ohne WordPress (Git-CMS, z. B. Sveltia)</div>
+
+  <div class="app">
+    <aside class="side">
+      <div class="brand"><span class="logo">🦷</span> Praxis-CMS</div>
+      <div class="nav">
+        <a class="on" data-scr="s-list"><span class="ic">📝</span> Ratgeber</a>
+        <a data-scr="s-list"><span class="ic">📄</span> Seiten</a>
+        <a data-scr="s-list"><span class="ic">👩‍⚕️</span> Team</a>
+        <a data-scr="s-list"><span class="ic">🖼️</span> Mediathek</a>
+        <div class="small">Formulare</div>
+        <a data-scr="s-eing"><span class="ic">📥</span> Eingänge</a>
+      </div>
+      <div class="user"><span class="av">NE</span> Natalia E. · angemeldet</div>
+    </aside>
+
+    <main class="main">
+      <!-- LIST -->
+      <section class="scr on" id="s-list">
+        <div class="main-h"><h2>Ratgeber</h2><button class="btn btn-cyan" data-go="s-edit">＋ Neuer Artikel</button></div>
+        <div class="list">
+          <div class="row" data-go="s-edit"><div class="th">🦷</div><div><div class="t">Wurzelbehandlung: Wann sie nötig ist</div><div class="m">Endodontie · zuletzt 14.05.2026</div></div><span class="st">Veröffentlicht</span></div>
+          <div class="row" data-go="s-edit"><div class="th">😬</div><div><div class="t">Zahnarztangst überwinden</div><div class="m">Angstpatienten · 28.04.2026</div></div><span class="st">Veröffentlicht</span></div>
+          <div class="row" data-go="s-edit"><div class="th">👄</div><div><div class="t">Mundgeruch: Ursachen &amp; Hilfe</div><div class="m">Prophylaxe · 11.04.2026</div></div><span class="st">Veröffentlicht</span></div>
+          <div class="row" data-go="s-edit"><div class="th">🦷</div><div><div class="t">Parodontitis erkennen</div><div class="m">Parodontologie · Entwurf</div></div><span class="st draft">Entwurf</span></div>
+        </div>
+        <div class="note">Wie WordPress eine Liste deiner Artikel — nur klarer. <b>Klick auf einen Artikel</b> oder „Neuer Artikel“ öffnet den Editor.</div>
+      </section>
+
+      <!-- EDITOR -->
+      <section class="scr" id="s-edit">
+        <div class="main-h"><h2>Artikel bearbeiten</h2><div><button class="btn btn-ghost" data-go="s-list">Zurück</button> <button class="btn btn-cyan" id="pub">Veröffentlichen</button></div></div>
+        <div class="editor">
+          <div class="canvas">
+            <div class="lab">Titel</div>
+            <input class="inp titlein" value="Wurzelbehandlung: Wann sie nötig ist">
+            <div class="lab">Beitragsbild</div>
+            <div class="dropimg">🖼️ Bild hierher ziehen oder auswählen — aus der Mediathek</div>
+            <div class="lab">Text</div>
+            <div class="rte">
+              <div class="bar"><span><b>B</b></span><span><i>I</i></span><span>🔗</span><span>“”</span><span>≔</span><span title="Bild einfügen">🖼️</span></div>
+              <div class="body">Eine Wurzelbehandlung klingt schlimmer, als sie ist. Meist rettet sie den eigenen Zahn — schmerzfrei und in wenigen Sitzungen…</div>
+            </div>
+          </div>
+          <aside class="epanel">
+            <div class="pcard"><h4>Status</h4>
+              <div class="prow"><span>Status</span><b>Veröffentlicht</b></div>
+              <div class="prow"><span>Datum</span><b>14.05.2026</b></div>
+              <div class="prow"><span>Kategorie</span><b>Endodontie</b></div>
+            </div>
+            <div class="pcard"><h4>SEO (eingebaut)</h4>
+              <div class="lab" style="margin-top:0">Meta-Titel</div><input class="inp" value="Wurzelbehandlung – wann nötig?">
+              <div class="lab">Fokus-Keyword</div><input class="inp" value="Wurzelbehandlung">
+            </div>
+          </aside>
+        </div>
+        <div class="note"><b>„Veröffentlichen“</b> → die Änderung wird automatisch in <code>Git</code> gespeichert → die schnelle Seite <b>baut sich von selbst neu</b> (~1 Min). Du siehst nichts von Git — nur den Button.</div>
+      </section>
+
+      <!-- EINGÄNGE -->
+      <section class="scr" id="s-eing">
+        <div class="main-h"><h2>Formular-Eingänge</h2><span class="m" style="color:var(--muted);font-size:12px">Sicherheitskopie aller Anfragen</span></div>
+        <div class="list">
+          <div class="row"><div class="th">📩</div><div><div class="t">Sabine Meyer · Terminanfrage</div><div class="m">„Pochender Schmerz am Backenzahn“ · heute 09:14</div></div><span class="st">Neu</span></div>
+          <div class="row"><div class="th">📩</div><div><div class="t">Thomas Brandt · Kontakt</div><div class="m">Kontrolle + Prophylaxe · gestern 17:42</div></div><span class="st" style="background:#eef0f4;color:var(--muted)">Gelesen</span></div>
+        </div>
+        <div class="note">Auch ohne WordPress wird <b>jede Anfrage gespeichert</b> — hier als Sicherheitsnetz, zusätzlich zur E-Mail (siehe unten).</div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ===================== TEIL 2: E-MAIL ===================== -->
+  <div class="sec-label">② Formulare &amp; E-Mail — wie der Versand genau funktioniert</div>
+
+  <div class="flow">
+    <div class="step"><span class="n">1</span><h4>Formular</h4><p>Besucher füllt auf der schnellen Seite aus (Name, Telefon, Wunschtermin).</p></div>
+    <div class="arrow">→</div>
+    <div class="step"><span class="n">2</span><h4>Kleine Funktion</h4><p>Eine winzige Server-Funktion nimmt die Daten an &amp; prüft Spam (Turnstile + Honeypot).</p></div>
+    <div class="arrow">→</div>
+    <div class="step"><span class="n">3</span><h4>Versand per SMTP</h4><p>Sie verschickt die E-Mail über dein echtes Praxis-Postfach.</p></div>
+    <div class="arrow">→</div>
+    <div class="step you"><span class="n">4</span><h4>Du bekommst</h4><p>📧 E-Mail an praxis@ · 💾 Eingang gespeichert · ✉️ Auto-Antwort an Patient.</p></div>
+  </div>
+
+  <div class="grid2">
+    <div class="mail">
+      <div class="h">📥 Posteingang — praxis@dr-ehrlichmann.de</div>
+      <div class="meta">
+        <div class="subj">Neue Terminanfrage von Sabine Meyer</div>
+        <div class="li"><b>Von:</b> Praxis-Website &lt;termin@dr-ehrlichmann.de&gt;</div>
+        <div class="li"><b>An:</b> praxis@dr-ehrlichmann.de</div>
+        <div class="li"><b>Antwort an:</b> sabine.meyer@example.de</div>
+        <div class="li">heute, 09:14</div>
+      </div>
+      <div class="body">
+        Neue Terminanfrage über die Website:
+        <table>
+          <tr><td class="k">Name</td><td><b>Sabine Meyer</b></td></tr>
+          <tr><td class="k">Telefon</td><td>0173 1234567</td></tr>
+          <tr><td class="k">E-Mail</td><td>sabine.meyer@example.de</td></tr>
+          <tr><td class="k">Wunschtermin</td><td>nächste Woche, vormittags</td></tr>
+          <tr><td class="k">Anliegen</td><td>Pochender Schmerz am Backenzahn</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="deliver">
+      <h4>📬 Damit die Mail im Posteingang landet (nicht im Spam)</h4>
+      <p style="margin:.2rem 0 .8rem;color:var(--muted);font-size:12.5px">Drei DNS-Einträge auf deiner Domain — ich richte sie beim Bau ein:</p>
+      <div class="d"><span class="tag">SPF</span><span><b>Erlaubt</b> dem Server, in deinem Namen zu senden.</span></div>
+      <div class="d"><span class="tag">DKIM</span><span><b>Signiert</b> jede Mail — beweist, dass sie echt von dir ist.</span></div>
+      <div class="d"><span class="tag">DMARC</span><span><b>Regel</b>, was mit gefälschten Mails passiert — schützt deinen Ruf.</span></div>
+      <div class="note" style="margin-top:12px">Versand über das <b>echte Praxis-Postfach</b> (SMTP) auf <b>Hetzner (EU/DSGVO)</b>. Optional Auto-Antwort an den Patienten. Alles ohne WordPress.</div>
+    </div>
+  </div>
+
+  <!-- ===================== VERGLEICH ===================== -->
+  <div class="sec-label">Ehrlicher Vergleich: mit vs. ohne WordPress</div>
+  <table class="cmp">
+    <tr><th>&nbsp;</th><th>Mit WordPress (headless)</th><th>Ohne WordPress (Git-CMS)</th></tr>
+    <tr><td>Bedienung / Panel</td><td class="yes">vertraut (wie heute)</td><td class="warn">neu, aber klarer/einfacher</td></tr>
+    <tr><td>Wartung &amp; Sicherheit</td><td class="warn">WordPress muss laufen + Updates</td><td class="yes">nichts zu warten, sehr sicher</td></tr>
+    <tr><td>Kosten Infrastruktur</td><td class="warn">höher (WP-Hosting)</td><td class="yes">minimal (CMS gratis)</td></tr>
+    <tr><td>Mediathek</td><td class="yes">voll, wie gewohnt</td><td>einfacher, reicht aus</td></tr>
+    <tr><td>Kommentare (deine 48)</td><td class="yes">eingebaut, bleiben in WP</td><td class="warn">extra Dienst nötig</td></tr>
+    <tr><td>Formular &amp; E-Mail</td><td>Contact Form 7</td><td>kleine Funktion + SMTP (oben)</td></tr>
+    <tr><td>Tempo der Seite</td><td class="yes">100/100 (Astro)</td><td class="yes">100/100 (Astro)</td></tr>
+    <tr><td>GitHub-Konto nötig?</td><td>nein</td><td class="warn">ja (Inhalte liegen in Git)</td></tr>
+  </table>
+
+</div>
+
+<script>
+  const navs=document.querySelectorAll('.nav a');
+  const scrs=document.querySelectorAll('.scr');
+  function show(id){scrs.forEach(s=>s.classList.toggle('on',s.id===id));}
+  navs.forEach(a=>a.addEventListener('click',()=>{navs.forEach(x=>x.classList.remove('on'));a.classList.add('on');show(a.dataset.scr);}));
+  document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',()=>show(el.dataset.go)));
+  const pub=document.getElementById('pub');
+  pub.addEventListener('click',()=>{pub.textContent='✓ Veröffentlicht — Seite baut neu…';setTimeout(()=>pub.textContent='Veröffentlichen',2200);});
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+---
+// Premium horizontal photo slider: scroll-snap, arrows, drag, gentle autoplay,
+// lightbox on click. Respects prefers-reduced-motion (no autoplay).
+interface Props {
+  photos: { src: string; alt: string }[];
+  gallery?: string;
+}
+const { photos, gallery = 'praxis' } = Astro.props;
+---
+<div class="slider" data-slider>
+  <div class="slider-track" data-track>
+    {photos.map((p) => (
+      <a class="slide glightbox" href={p.src} data-gallery={gallery} aria-label={p.alt}>
+        <img src={p.src} alt={p.alt} loading="lazy" />
+      </a>
+    ))}
+  </div>
+  <button class="slider-btn prev" data-prev type="button" aria-label="Vorheriges Bild">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <button class="slider-btn next" data-next type="button" aria-label="Nächstes Bild">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+  </button>
+</div>
+
+<style>
+  .slider { position: relative; }
+  .slider-track {
+    display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory;
+    scroll-behavior: smooth; padding: 6px 2px; scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .slider-track::-webkit-scrollbar { display: none; }
+  .slide {
+    flex: 0 0 auto; width: clamp(260px, 44vw, 460px); aspect-ratio: 4 / 3;
+    scroll-snap-align: center; border-radius: 20px; overflow: hidden;
+    box-shadow: var(--shadow); background: var(--c50); cursor: zoom-in;
+  }
+  .slide img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s var(--ease); }
+  .slide:hover img { transform: scale(1.05); }
+  .slider-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 54px; height: 54px; border-radius: 50%; background: #fff;
+    border: 1px solid var(--line); box-shadow: var(--shadow); display: grid;
+    place-items: center; cursor: pointer; color: var(--navy); z-index: 3;
+    transition: transform .2s var(--ease), background .2s var(--ease), color .2s var(--ease);
+  }
+  .slider-btn svg { width: 24px; height: 24px; }
+  .slider-btn:hover { background: var(--c500); color: #fff; transform: translateY(-50%) scale(1.07); }
+  .slider-btn.prev { left: -14px; }
+  .slider-btn.next { right: -14px; }
+  @media (max-width: 680px) {
+    .slide { width: 82vw; }
+    .slider-btn { width: 44px; height: 44px; }
+    .slider-btn.prev { left: 4px; }
+    .slider-btn.next { right: 4px; }
+  }
+</style>
+
+<script>
+  document.querySelectorAll('[data-slider]').forEach((slider) => {
+    const track = slider.querySelector('[data-track]') as HTMLElement | null;
+    if (!track) return;
+    const prev = slider.querySelector('[data-prev]');
+    const next = slider.querySelector('[data-next]');
+    const step = () => ((track.querySelector('.slide') as HTMLElement | null)?.getBoundingClientRect().width || 320) + 18;
+    prev?.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
+    next?.addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
+
+    // drag to scroll (desktop)
+    let down = false, startX = 0, startLeft = 0;
+    track.addEventListener('pointerdown', (e) => { down = true; startX = e.pageX; startLeft = track.scrollLeft; track.style.cursor = 'grabbing'; });
+    window.addEventListener('pointerup', () => { down = false; track.style.cursor = ''; });
+    track.addEventListener('pointermove', (e) => { if (!down) return; track.scrollLeft = startLeft - (e.pageX - startX); });
+
+    // gentle autoplay (skipped when user prefers reduced motion)
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let timer: any;
+    const tick = () => {
+      if (Math.ceil(track.scrollLeft + track.clientWidth) >= track.scrollWidth - 4) track.scrollTo({ left: 0, behavior: 'smooth' });
+      else track.scrollBy({ left: step(), behavior: 'smooth' });
+    };
+    const start = () => { timer = setInterval(tick, 4200); };
+    const stop = () => clearInterval(timer);
+    start();
+    slider.addEventListener('mouseenter', stop);
+    slider.addEventListener('mouseleave', start);
+    track.addEventListener('pointerdown', stop);
+  });
+</script>

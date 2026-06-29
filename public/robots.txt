@@ -1,0 +1,5 @@
+# Zahnarztpraxis Dr. Natalia Ehrlichmann — alle Crawler willkommen, inkl. KI-Crawler.
+User-agent: *
+Allow: /
+
+Sitemap: https://dr-ehrlichmann.de/sitemap-index.xml

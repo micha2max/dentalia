@@ -1,0 +1,5 @@
+# Permissions-Policy enables WebMCP tools (agent-ready). Read by Netlify /
+# Cloudflare Pages. On the Hostinger VPS nginx target, set the same header in
+# the server block: add_header Permissions-Policy "tools=(self)";
+/*
+  Permissions-Policy: tools=(self)

@@ -1,0 +1,28 @@
+# systemd unit for the form backend.
+# Install: copy to /etc/systemd/system/dentalia-forms.service
+#          sudo systemctl daemon-reload && sudo systemctl enable --now dentalia-forms
+[Unit]
+Description=Dentalia form backend (dr-ehrlichmann.de)
+After=network.target
+
+[Service]
+Type=simple
+# Run as an unprivileged user (create with: sudo adduser --system --group dentalia)
+User=dentalia
+Group=dentalia
+WorkingDirectory=/opt/dentalia-forms
+EnvironmentFile=/opt/dentalia-forms/.env
+ExecStart=/usr/bin/node server.mjs
+Restart=on-failure
+RestartSec=3
+# writable backup dir (DATA_DIR in .env)
+StateDirectory=dentalia-forms
+ReadWritePaths=/var/lib/dentalia-forms
+# hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

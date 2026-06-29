@@ -1,0 +1,366 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { praxis } from '../data/site';
+import reviews from '../data/reviews.json';
+
+// Patient reviews — taken verbatim from the live dr-ehrlichmann.de homepage
+// widget (Google + Facebook). Stored in src/data/reviews.json. The aggregate
+// rating stays LOCKED at 27 Google / 4,8★ (site.ts); these are the individual
+// testimonial cards (Google + Facebook) shown below it.
+const initials = (name: string) =>
+  name.split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+
+const title = 'Zahnarzt Neunkirchen-Seelscheid | Dr. Natalia Ehrlichmann';
+const description =
+  'Zahnarztpraxis Dr. Natalia Ehrlichmann in Neunkirchen-Seelscheid: ehrliche, moderne Zahnmedizin für die ganze Familie, einfühlsam auch für Angstpatienten.';
+
+// FAQ — single source for the visible accordion AND the FAQPage JSON-LD.
+// Antworten faktentreu zu /fragen + site.ts (Öffnungszeiten, Notdienst, NAP).
+const faqs = [
+  {
+    q: 'Wann ist die Zahnarztpraxis geöffnet?',
+    a: 'Wir haben Mo, Di und Do von 8:00 bis 18:30 Uhr sowie Mi und Fr von 8:00 bis 13:00 Uhr für Sie geöffnet. Außerhalb dieser Zeiten erreichen Sie den zahnärztlichen Notdienst der KZV Nordrhein unter 01805 986700.',
+  },
+  {
+    q: 'Wie vereinbare ich einen Termin?',
+    a: 'Am schnellsten telefonisch unter 02247 7171 oder jederzeit bequem über unser Online-Formular. Wir reservieren für jeden Patienten einen festen Termin, damit Wartezeiten möglichst kurz bleiben.',
+    link: { href: '/terminanfrage', label: 'Termin online anfragen' },
+  },
+  {
+    q: 'Nehmen Sie auch neue Patienten an?',
+    a: 'Ja, sehr gerne – gesetzlich wie privat Versicherte und Selbstzahler. Beim ersten Termin steht eine gründliche, behutsame Untersuchung im Mittelpunkt; die nächsten Schritte besprechen wir anschließend gemeinsam, ganz ohne Druck.',
+  },
+  {
+    q: 'Was tun bei akuten Zahnschmerzen außerhalb der Öffnungszeiten?',
+    a: 'Bei starken Schmerzen, einer geschwollenen Wange oder nach einem Zahnunfall hilft der zahnärztliche Notdienst der KZV Nordrhein rund um die Uhr unter 01805 986700. Innerhalb unserer Sprechzeiten rufen Sie uns direkt an – wir finden kurzfristig einen Termin.',
+    link: { href: '/ratgeber/notdienst', label: 'Mehr zum Notdienst' },
+  },
+  {
+    q: 'Gibt es Parkplätze an der Praxis?',
+    a: 'Ja. Direkt auf dem Praxishof in der Zeithstraße 117 stehen kostenlose Parkplätze für Sie bereit – ebenerdig und barrierefrei erreichbar.',
+  },
+  {
+    q: 'Ich habe Angst vorm Zahnarzt – wie läuft die Behandlung ab?',
+    a: 'Sie bestimmen das Tempo. Beim ersten Termin schauen wir nur und besprechen alles in Ruhe; danach planen wir die Behandlung in kleinen, gut machbaren Schritten – auf Wunsch bis hin zur Behandlung im Dämmerschlaf.',
+    link: { href: '/ratgeber/zahnarztangst-verstehen-und-endlich-besiegen', label: 'So behandeln wir Angstpatienten' },
+  },
+];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  '@id': `${praxis.url}/#faq`,
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+---
+
+<BaseLayout title={title} description={description}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+  </Fragment>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow"><Icon name="tooth" /> Zahnärztin · Neunkirchen-Seelscheid</span>
+        <h1>Ehrliche Zahnmedizin für die <em>ganze Familie</em>.</h1>
+        <p class="sub">Seit über 45 Jahren in Neunkirchen-Seelscheid – ruhig, modern und persönlich. Auch wenn Sie Angst vorm Zahnarzt haben, sind Sie bei uns in guten Händen.</p>
+        <div class="cta-row">
+          <a class="btn btn-cyan" href="/terminanfrage">Termin vereinbaren</a>
+          <a class="btn btn-ghost" href={praxis.phoneHref}>{praxis.phone}</a>
+        </div>
+        <div class="micro-badges">
+          <span><Icon name="check" strokeWidth={2.2} size={16} /> Termin in wenigen Tagen</span>
+          <span><Icon name="check" strokeWidth={2.2} size={16} /> Alle Kassen &amp; privat</span>
+          <span><Icon name="check" strokeWidth={2.2} size={16} /> Kostenlose Parkplätze</span>
+        </div>
+      </div>
+      <div class="hero-media">
+        <div class="frame"><img src="/wp-content/uploads/2025/11/zahnarztpraxis_neunkirchen-seelscheid_familie.webp" alt="Familie in der Zahnarztpraxis Dr. Ehrlichmann" width="800" height="900" fetchpriority="high" loading="eager" /></div>
+        <div class="chip-rating" aria-label="4,8 von 5 Sternen aus 27 Google-Bewertungen"><span class="stars" aria-hidden="true">★★★★★</span><span><b>4,8</b><small>27&nbsp;Google</small></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SYMPTOME -->
+  <section class="section" id="symptome">
+    <div class="wrap">
+      <div class="section-head center reveal">
+        <span class="eyebrow" style="justify-content:center">Womit können wir helfen?</span>
+        <h2 class="section-title">Was tut weh?</h2>
+        <p class="section-intro">Wählen Sie Ihr Anliegen – wir zeigen Ihnen direkt den passenden Weg.</p>
+      </div>
+      <div class="symptom-grid reveal">
+        <a class="symptom-card" href="/leistungen/zahngesundheit">
+          <div class="si"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></div>
+          <h3>Zahnschmerzen</h3><p>Akut oder pochend – wir finden die Ursache.</p>
+        </a>
+        <a class="symptom-card" href="/leistungen/zahnaesthetik">
+          <div class="si"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.6C5.3 3.6 4 5 4 6.9c0 2.3.7 4.6 1 6.3.4 2.4.7 4.6 1.5 5.7.6.8 1.4.5 1.7-.4.5-1.6.6-3.4 1.3-4.5.4-.5 1.6-.5 2 0 .7 1.1.8 2.9 1.3 4.5.3.9 1.1 1.2 1.7.4.8-1.1 1.1-3.3 1.5-5.7.3-1.7 1-4 1-6.3 0-1.9-1.3-3.3-3-3.3-1.1 0-2 .6-3 .6s-1.9-.6-3-.6z"/></svg></div>
+          <h3>Abgebrochener Zahn</h3><p>Schnelle, ästhetische Versorgung.</p>
+        </a>
+        <a class="symptom-card" href="/leistungen/parodontitisbehandlung">
+          <div class="si"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.5 4.5 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 2.5-6.5 6-11z"/></svg></div>
+          <h3>Zahnfleischbluten</h3><p>Frühzeichen ernst nehmen – wir helfen.</p>
+        </a>
+        <a class="symptom-card" href="/leistungen/zahngesundheit/fuellungen">
+          <div class="si"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="2.5"/><path d="M9.5 9.5l5 5M14.5 9.5l-5 5"/></svg></div>
+          <h3>Füllung verloren</h3><p>Zeitnahe Neuversorgung Ihres Zahns.</p>
+        </a>
+        <a class="symptom-card" href="/leistungen/zahngesundheit">
+          <div class="si"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M4 7l16 10M20 7 4 17"/></svg></div>
+          <h3>Empfindliche Zähne</h3><p>Schmerz bei kalt &amp; warm? Wir lindern ihn.</p>
+        </a>
+        <a class="symptom-card" href="/ratgeber/zahnarztangst-verstehen-und-endlich-besiegen">
+          <div class="si"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.3-7-9.3A3.7 3.7 0 0 1 12 8a3.7 3.7 0 0 1 7 2.7c0 5-7 9.3-7 9.3z"/></svg></div>
+          <h3>Angst vorm Zahnarzt</h3><p>Einfühlsam, Schritt für Schritt, in Ihrem Tempo.</p>
+        </a>
+      </div>
+      <div class="phone-cta reveal">
+        <div><h3>Akute Schmerzen? Wir helfen schnell.</h3><p>Rufen Sie uns an – wir finden kurzfristig einen Termin.</p></div>
+        <a class="num" href={praxis.phoneHref}><Icon name="phone" size={24} />{praxis.phone}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCHWERPUNKTE -->
+  <section class="section" id="leistungen">
+    <div class="wrap">
+      <div class="section-head reveal" style="max-width:none">
+        <span class="eyebrow">Schwerpunkte</span>
+        <h2 class="section-title">Drei Schwerpunkte für ein Lächeln, das hält</h2>
+        <p class="section-intro">Von den ersten Milchzähnen bis ins hohe Alter – die ganze Bandbreite moderner Zahnmedizin unter einem Dach.</p>
+      </div>
+      <div class="focus reveal">
+        <a class="focus-card" href="/leistungen/kinderzahnmedizin">
+          <img src="/wp-content/uploads/2019/01/kinderzahnmedizin.jpg" alt="Kinderzahnmedizin" loading="lazy" /><div class="ov"></div>
+          <div class="fb"><span class="cat">Kinder &amp; Familie</span><h3>Kinderzahnmedizin</h3><p>Altersgerecht, geduldig und ganz ohne Druck.</p><span class="lnk arrow">Behandlungen ansehen </span></div>
+        </a>
+        <a class="focus-card" href="/leistungen/zahnaesthetik/prophylaxe">
+          <img src="/wp-content/uploads/2019/01/prophylaxe-seelscheid-1024x682.jpg" alt="Vorsorge und Zahnerhalt" width="1024" height="682" loading="lazy" /><div class="ov"></div>
+          <div class="fb"><span class="cat">Vorsorge</span><h3>Zahnerhalt &amp; Prophylaxe</h3><p>Professionelle Reinigung, die Problemen zuvorkommt.</p><span class="lnk arrow">Behandlungen ansehen </span></div>
+        </a>
+        <a class="focus-card" href="/leistungen/zahnersatz/zahnimplantate">
+          <img src="/wp-content/uploads/2019/01/zahnimplantate-seelscheid-1024x640.jpg" alt="Ästhetik und Implantate" width="1024" height="640" loading="lazy" /><div class="ov"></div>
+          <div class="fb"><span class="cat">Ästhetik &amp; Ersatz</span><h3>Implantate &amp; Ästhetik</h3><p>Natürlich schöner, festsitzender Zahnersatz.</p><span class="lnk arrow">Behandlungen ansehen </span></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURE SPLIT: Angstpatienten -->
+  <section class="section alt">
+    <div class="wrap split">
+      <div class="media reveal"><img src="/wp-content/uploads/2019/02/behandlungsraum_blau.jpg" alt="Behandlungsraum" loading="lazy" /></div>
+      <div class="reveal">
+        <span class="eyebrow">Angstpatienten willkommen</span>
+        <h2 class="section-title">Keine Angst vorm Zahnarzt. Versprochen.</h2>
+        <p class="section-intro">Wir behandeln einfühlsam, Schritt für Schritt und in Ihrem Tempo – mit allen sanften Möglichkeiten bis hin zur Behandlung im Dämmerschlaf.</p>
+        <ul class="usp-list">
+          <li><span class="tick"><Icon name="check" strokeWidth={2.4} size={15} /></span> Ausführliche, ruhige Erstberatung ohne Zeitdruck</li>
+          <li><span class="tick"><Icon name="check" strokeWidth={2.4} size={15} /></span> Schonende, möglichst schmerzfreie Behandlung</li>
+          <li><span class="tick"><Icon name="check" strokeWidth={2.4} size={15} /></span> Transparente Kostenplanung – keine Überraschungen</li>
+        </ul>
+        <div class="cta-row" style="margin-top:1.8rem"><a class="btn btn-cyan" href="/ratgeber/zahnarztangst-verstehen-und-endlich-besiegen">So behandeln wir Angstpatienten </a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT + TIMELINE -->
+  <section class="section" id="praxis">
+    <div class="wrap split">
+      <div class="reveal">
+        <span class="eyebrow">Ihre Zahnärztin</span>
+        <h2 class="section-title">Dr. Natalia Ehrlichmann</h2>
+        <p class="section-intro">Familiär statt Klinik-Fabrik: Wir nehmen uns Zeit, erklären jeden Schritt und behandeln alle Generationen einer Familie – persönlich, nicht am Fließband.</p>
+        <ul class="timeline">
+          <li><b>seit 1981</b><span>Zahnarztpraxis in Neunkirchen-Seelscheid</span></li>
+          <li><b>Familienzahnmedizin</b><span>vom ersten Milchzahn bis ins hohe Alter</span></li>
+          <li><b>Schwerpunkt Angstpatienten</b><span>einfühlsame Behandlung, auch im Dämmerschlaf</span></li>
+          <li><b>über 45 Jahre Erfahrung</b><span>Mitglied der Zahnärztekammer &amp; KZV Nordrhein</span></li>
+        </ul>
+        <div class="cta-row" style="margin-top:1.8rem"><a class="btn btn-ghost" href="/zahnarztpraxis">Praxis kennenlernen </a></div>
+      </div>
+      <div class="media media--portrait reveal"><img src="/wp-content/uploads/2024/12/dr.natalia_ehrlichmann.jpg" alt="Dr. Natalia Ehrlichmann" width="250" height="250" loading="lazy" /></div>
+    </div>
+  </section>
+
+  <!-- WARUM WIR -->
+  <section class="section" id="warum">
+    <div class="wrap">
+      <div class="section-head center reveal"><span class="eyebrow" style="justify-content:center">Warum wir</span><h2 class="section-title">Warum Patienten uns vertrauen</h2></div>
+      <div class="why-grid reveal">
+        <div class="why-item"><div class="why-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>45 Jahre Erfahrung</h3><p>Seit 1981 in Seelscheid – Zahnmedizin für Generationen einer Familie.</p></div>
+        <div class="why-item"><div class="why-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.3-7-9.3A3.7 3.7 0 0 1 12 8a3.7 3.7 0 0 1 7 2.7c0 5-7 9.3-7 9.3z"/></svg></div><h3>Einfühlsam &amp; schmerzarm</h3><p>Ruhige Behandlung in Ihrem Tempo – auch bei Zahnarztangst.</p></div>
+        <div class="why-item"><div class="why-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5"/></svg></div><h3>Transparente Kosten</h3><p>Klare Kostenpläne vor der Behandlung – keine Überraschungen.</p></div>
+        <div class="why-item"><div class="why-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.5v5c0 4.4-3 7.4-7 9-4-1.6-7-4.6-7-9v-5z"/><path d="M9 12l2 2 4-4"/></svg></div><h3>Alle Kassen &amp; barrierefrei</h3><p>Gesetzlich &amp; privat, ebenerdiger Zugang und kostenlose Parkplätze.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="section alt">
+    <div class="wrap">
+      <div class="section-head center reveal">
+        <span class="eyebrow" style="justify-content:center">Leistungen</span>
+        <h2 class="section-title">Was wir für Ihre Zähne tun</h2>
+      </div>
+      <div class="cards reveal">
+        <a class="card" href="/leistungen/zahnaesthetik/prophylaxe"><div class="card-media"><img src="/wp-content/uploads/2019/01/prophylaxe-seelscheid-750x500.jpg" alt="Prophylaxe" width="750" height="500" loading="lazy" /></div><div class="card-body"><div class="svc-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="13.5" width="9" height="3.2" rx="1.4"/><path d="M12 15.1h5a2.5 2.5 0 0 0 2.5-2.5V7.5"/><path d="M4.6 13.5v-1.8M6.4 13.5v-2.4M8.2 13.5v-1.8M10 13.5v-2.4"/></svg></div><h3 class="card-title">Prophylaxe &amp; PZR</h3><p class="card-text">Professionelle Zahnreinigung für gesunde Zähne und Zahnfleisch.</p><span class="card-link arrow">Mehr </span></div></a>
+        <a class="card" href="/leistungen/zahnersatz/zahnimplantate"><div class="card-media"><img src="/wp-content/uploads/2019/01/zahnimplantate-seelscheid-750x500.jpg" alt="Zahnimplantate" width="750" height="500" loading="lazy" /></div><div class="card-body"><div class="svc-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l1.8 4.7L18.5 10l-4.7 1.8L12 16l-1.8-4.2L5.5 10l4.7-1.3z"/></svg></div><h3 class="card-title">Zahnimplantate</h3><p class="card-text">Fester, natürlich aussehender Ersatz für fehlende Zähne.</p><span class="card-link arrow">Mehr </span></div></a>
+        <a class="card" href="/leistungen/kinderzahnmedizin"><div class="card-media"><img src="/wp-content/uploads/2019/01/kinderzahnmedizin-750x500.jpg" alt="Kinderzahnmedizin" width="750" height="500" loading="lazy" /></div><div class="card-body"><div class="svc-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9 10h.01M15 10h.01M8.5 14.5a4.5 4.5 0 0 0 7 0"/></svg></div><h3 class="card-title">Kinderzahnmedizin</h3><p class="card-text">Altersgerechte, geduldige Behandlung für die Kleinen.</p><span class="card-link arrow">Mehr </span></div></a>
+        <a class="card" href="/leistungen/zahnaesthetik"><div class="card-media"><img src="/wp-content/uploads/2019/01/bleaching_nacher-750x500.jpg" alt="Zahnästhetik und Bleaching" width="750" height="500" loading="lazy" /></div><div class="card-body"><div class="svc-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l1.8 4.7L18.5 10l-4.7 1.8L12 16l-1.8-4.2L5.5 10l4.7-1.3z"/><path d="M18 15l.6 1.6L20.5 17l-1.7.6L18 19z"/></svg></div><h3 class="card-title">Ästhetik &amp; Bleaching</h3><p class="card-text">Schöne, weiße Zähne – schonend und natürlich aufgehellt.</p><span class="card-link arrow">Mehr </span></div></a>
+        <a class="card" href="/leistungen/wurzelkanalbehandlung"><div class="card-media"><img src="/wp-content/uploads/2019/01/wurzelkanalbehandlung-750x500.jpg" alt="Wurzelkanalbehandlung" width="750" height="500" loading="lazy" /></div><div class="card-body"><div class="svc-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.6C5.3 3.6 4 5 4 6.9c0 2.3.7 4.6 1 6.3.4 2.4.7 4.6 1.5 5.7.6.8 1.4.5 1.7-.4.5-1.6.6-3.4 1.3-4.5.4-.5 1.6-.5 2 0 .7 1.1.8 2.9 1.3 4.5.3.9 1.1 1.2 1.7.4.8-1.1 1.1-3.3 1.5-5.7.3-1.7 1-4 1-6.3 0-1.9-1.3-3.3-3-3.3-1.1 0-2 .6-3 .6s-1.9-.6-3-.6z"/></svg></div><h3 class="card-title">Wurzelkanalbehandlung</h3><p class="card-text">Den eigenen Zahn erhalten – modern und schonend.</p><span class="card-link arrow">Mehr </span></div></a>
+        <a class="card" href="/leistungen/parodontitisbehandlung"><div class="card-media"><img src="/wp-content/uploads/2019/02/paradontologie-750x500.jpg" alt="Parodontitisbehandlung" width="750" height="500" loading="lazy" /></div><div class="card-body"><div class="svc-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.5v5c0 4.4-3 7.4-7 9-4-1.6-7-4.6-7-9v-5z"/><path d="M9 12l2 2 4-4"/></svg></div><h3 class="card-title">Parodontitis</h3><p class="card-text">Gesundes Zahnfleisch als Fundament für feste Zähne.</p><span class="card-link arrow">Mehr </span></div></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="section tint" id="test">
+    <div class="wrap">
+      <div class="section-head center reveal">
+        <span class="eyebrow" style="justify-content:center">Interaktiv</span>
+        <h2 class="section-title">Wie gesund sind Ihre Zähne?</h2>
+        <p class="section-intro">Beantworten Sie 10 kurze Fragen – am Ende erhalten Sie eine ehrliche Einschätzung. Ganz ohne Mogeln!</p>
+        <p class="section-intro" style="font-size:.85rem;opacity:.7;margin-top:.5rem">Hinweis: Der Test dient der Orientierung und ersetzt keine zahnärztliche Untersuchung oder Diagnose.</p>
+      </div>
+      <div class="quiz-wrap reveal"><div class="quiz" id="quiz"></div></div>
+    </div>
+  </section>
+
+  <!-- TEAM (van Giersbergen entfernt) -->
+  <section class="section" id="team">
+    <div class="wrap">
+      <div class="section-head center reveal"><span class="eyebrow" style="justify-content:center">Unser Team</span><h2 class="section-title">Menschen, die sich kümmern</h2></div>
+      <div class="team-grid reveal">
+        <div class="member"><div class="member-photo"><img src="/wp-content/uploads/2024/12/dr.natalia_ehrlichmann.jpg" alt="Dr. Natalia Ehrlichmann" width="250" height="250" loading="lazy" /></div><h3>Dr. Natalia Ehrlichmann</h3><span>Zahnärztin · Inhaberin</span></div>
+        <div class="member"><div class="member-photo"><img src="/wp-content/uploads/2024/11/frau_tillmann_rezeption.jpg" alt="Claudia Tillmann" loading="lazy" /></div><h3>Claudia Tillmann</h3><span>Verwaltung &amp; Empfang</span></div>
+        <div class="member"><div class="member-photo"><img src="/wp-content/uploads/2021/01/andrea_geick_neunkirchen-seelscheid.jpg" alt="Andrea Geick" loading="lazy" /></div><h3>Andrea Geick</h3><span>Zahnmedizinische Assistenz</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section alt" id="bewertungen">
+    <div class="wrap">
+      <div class="reviews-head reveal"><span class="eyebrow">Bewertungen</span><h2 class="section-title">Das sagen unsere Patienten</h2><div class="reviews-score"><span class="stars" style="font-size:1.4rem">★★★★★</span><span class="score">4,8</span><span class="meta"><strong style="color:var(--ink)">Sehr gut</strong><small>aus 27&nbsp;Google-Bewertungen</small></span></div></div>
+      <div class="review-rail reveal" role="list">
+        {reviews.map((r) => (
+          <article class="review" role="listitem">
+            <div class="r-top">
+              <span class="stars" aria-label={`${r.rating} von 5 Sternen`}>{'★'.repeat(r.rating)}</span>
+              {r.source === 'facebook' ? (
+                <span class="r-src fb" title="Facebook-Bewertung" aria-label="Quelle: Facebook"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg></span>
+              ) : (
+                <span class="r-src gg" title="Google-Bewertung" aria-label="Quelle: Google"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.66-.06-1.29-.17-1.9H12v3.6h5.38a4.6 4.6 0 0 1-2 3.02v2.5h3.23c1.89-1.74 2.99-4.3 2.99-7.22z"/><path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.43l-3.23-2.5c-.9.6-2.05.95-3.39.95-2.6 0-4.8-1.76-5.59-4.12H3.07v2.59A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.41 13.9a6 6 0 0 1 0-3.8V7.51H3.07a10 10 0 0 0 0 8.98l3.34-2.59z"/><path fill="#EA4335" d="M12 5.98c1.47 0 2.79.5 3.83 1.5l2.86-2.86A10 10 0 0 0 12 2 10 10 0 0 0 3.07 7.51l3.34 2.59C7.2 7.74 9.4 5.98 12 5.98z"/></svg></span>
+              )}
+            </div>
+            <p>„{r.text}“</p>
+            <div class="who"><span class="r-av">{initials(r.author)}</span><span class="who-t"><b>{r.author}</b><small>{r.source === 'facebook' ? 'Facebook' : 'Google'}-Bewertung</small></span></div>
+          </article>
+        ))}
+      </div>
+      <p class="reviews-hint reveal" aria-hidden="true">← Weitere Bewertungen seitlich scrollen →</p>
+    </div>
+  </section>
+
+  <!-- BLOG TEASER -->
+  <section class="section" id="ratgeber">
+    <div class="wrap">
+      <div class="section-head reveal"><span class="eyebrow">Wissen &amp; Tipps</span><h2 class="section-title">Aus unserem Ratgeber</h2></div>
+      <div class="blog-grid reveal">
+        <a class="card" href="/ratgeber/mundgeruch"><div class="card-media"><img src="/wp-content/uploads/2023/02/mundgeruch-trotz-zaehneputzen.jpg" alt="Mundgeruch" loading="lazy" /></div><div class="card-body"><span class="chip">Gesunde Zähne</span><h3 class="card-title">Mundgeruch trotz Zähneputzen</h3><p class="card-text">Woran es liegt und welche Schritte schnell helfen.</p><span class="card-link arrow">Weiterlesen </span></div></a>
+        <a class="card" href="/ratgeber"><div class="card-media"><img src="/wp-content/uploads/2026/03/karies-verstehen-vorbeugen.webp" alt="Karies" loading="lazy" /></div><div class="card-body"><span class="chip">Praxiswissen</span><h3 class="card-title">Karies erkennen &amp; behandeln</h3><p class="card-text">Ursachen, Anzeichen und wie man vorbeugt.</p><span class="card-link arrow">Weiterlesen </span></div></a>
+        <a class="card" href="/ratgeber"><div class="card-media"><img src="/wp-content/uploads/2025/09/Kreidezaehne_bei_-Kindern.webp" alt="Kreidezähne" loading="lazy" /></div><div class="card-body"><span class="chip">Kinderzähne</span><h3 class="card-title">Kreidezähne erkennen</h3><p class="card-text">Was Eltern über MIH wissen sollten.</p><span class="card-link arrow">Weiterlesen </span></div></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section alt" id="faq">
+    <div class="wrap faq-wrap">
+      <div class="section-head center reveal">
+        <span class="eyebrow" style="justify-content:center"><Icon name="chat" /> Häufige Fragen</span>
+        <h2 class="section-title">Antworten auf Ihre häufigsten Fragen</h2>
+        <p class="section-intro">Von Öffnungszeiten bis Zahnarztangst – das Wichtigste auf einen Blick.</p>
+      </div>
+      <div class="faq reveal">
+        {faqs.map((f, i) => (
+          <details class="faq-item" open={i === 0}>
+            <summary>{f.q}<span class="faq-ico" aria-hidden="true"></span></summary>
+            <div class="faq-a">
+              <p>{f.a}</p>
+              {f.link && <a class="faq-link arrow" href={f.link.href}>{f.link.label} </a>}
+            </div>
+          </details>
+        ))}
+      </div>
+      <div class="faq-more reveal">
+        <span>Ihre Frage ist nicht dabei?</span>
+        <a class="btn btn-ghost" href="/fragen">Alle Fragen ansehen </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-band" id="termin">
+    <div class="wrap">
+      <h2>Bereit für Ihren Termin?</h2>
+      <p>Fragen Sie online an oder rufen Sie uns an – wir finden schnell einen passenden Termin.</p>
+      <div class="cta-row"><a class="btn btn-primary" href="/terminanfrage">Termin online anfragen</a><a class="btn btn-light" href={praxis.phoneHref}>{praxis.phone}</a></div>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      const Q = [
+        { q: 'Wie häufig putzen Sie Ihre Zähne?', o: [['1× täglich', 2], ['Mind. 2× täglich', 0]] },
+        { q: 'Reinigen Sie die Zahnzwischenräume (Zahnseide / Interdentalbürsten)?', o: [['Ja, täglich', 0], ['Manchmal', 1], ['Nein', 2]] },
+        { q: 'Haben Sie Zahnfleischbluten beim Putzen?', o: [['Nie', 0], ['Ab und zu', 1], ['Immer', 2]] },
+        { q: 'Leiden Sie bereits unter Parodontitis oder Karies?', o: [['Keines', 0], ['Parodontitis oder Karies', 1], ['Beides', 2]] },
+        { q: 'Wie viele Füllungen haben Sie?', o: [['Keine', 0], ['1 bis 9', 1], ['Mehr als 9', 2]] },
+        { q: 'Sind bei Ihnen Kronen vorhanden?', o: [['Keine', 0], ['1 bis 6', 1], ['Mehr als 6', 2]] },
+        { q: 'Haben Sie Stiftzähne?', o: [['Keine', 0], ['1 bis 6', 1], ['Mehr als 6', 2]] },
+        { q: 'Haben einige Ihrer Zähne Absplitterungen?', o: [['Nein', 0], ['Ja', 2]] },
+        { q: 'Essen Sie regelmäßig stark zuckerhaltige Lebensmittel?', o: [['Nie', 0], ['Ab und zu', 1], ['Oft', 2]] },
+        { q: 'Rauchen Sie?', o: [['Nein', 0], ['Ja', 2]] },
+      ];
+      const R = {
+        prima: { cls: 'prima', t: 'Prima – Sie machen vieles richtig!', p: 'Sie pflegen Ihre Zähne gut und achten auf Ihre Ernährung. Bleiben Sie dran: mit regelmäßiger Vorsorge und professioneller Zahnreinigung bleiben Ihre Zähne lange gesund.', ic: '<path d="M5 12l4 4 10-10"/>' },
+        achtung: { cls: 'achtung', t: 'Achten Sie etwas mehr darauf', p: 'Im Grunde kümmern Sie sich um Ihre Zähne, in einigen Punkten geht aber mehr. Tägliche Zahnseide und eine professionelle Zahnreinigung in unserer Praxis machen den Unterschied.', ic: '<path d="M12 9v4M12 17h.01M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6A2 2 0 0 0 22 18L13.7 3.9a2 2 0 0 0-3.4 0z"/>' },
+        vorsicht: { cls: 'vorsicht', t: 'Vorsicht – hier besteht Handlungsbedarf', p: 'Mit ein paar Änderungen und einem Kontrolltermin lässt sich viel retten. Wir helfen Ihnen einfühlsam – auch wenn Sie Angst vorm Zahnarzt haben.', ic: '<path d="M12 9v4M12 17h.01M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6A2 2 0 0 0 22 18L13.7 3.9a2 2 0 0 0-3.4 0z"/>' },
+      };
+      const qEl = document.getElementById('quiz');
+      if (!qEl) return;
+      let idx = 0;
+      let ans = new Array(Q.length).fill(null);
+      function render() {
+        const q = Q[idx];
+        const pct = Math.round((idx / Q.length) * 100);
+        const opts = q.o.map((o, i) => '<button class="quiz-opt' + (ans[idx] === i ? ' sel' : '') + '" data-i="' + i + '"><span class="rd"></span>' + o[0] + '</button>').join('');
+        qEl.innerHTML =
+          '<div class="quiz-top"><h3>Zahngesundheits-Test</h3><p>Einfach ehrlich beantworten – am Ende sehen Sie das Ergebnis.</p></div>' +
+          '<div class="quiz-bar"><i style="width:' + pct + '%"></i></div>' +
+          '<div class="quiz-body"><div class="quiz-step">Frage ' + (idx + 1) + ' von ' + Q.length + '</div><div class="quiz-q">' + q.q + '</div><div class="quiz-options">' + opts + '</div>' +
+          '<div class="quiz-nav"><button class="btn btn-ghost" id="qPrev"' + (idx === 0 ? ' style="visibility:hidden"' : '') + '>Zurück</button><button class="btn btn-primary" id="qNext"' + (ans[idx] === null ? ' disabled style="opacity:.5;cursor:not-allowed"' : '') + '>' + (idx === Q.length - 1 ? 'Ergebnis' : 'Weiter') + '</button></div></div>';
+        qEl.querySelectorAll('.quiz-opt').forEach((b) => b.addEventListener('click', () => { ans[idx] = +(b.dataset.i || 0); render(); }));
+        const pv = document.getElementById('qPrev'); if (pv) pv.addEventListener('click', () => { if (idx > 0) { idx--; render(); } });
+        const nx = document.getElementById('qNext'); if (nx) nx.addEventListener('click', () => { if (ans[idx] === null) return; if (idx < Q.length - 1) { idx++; render(); } else result(); });
+      }
+      function result() {
+        const s = ans.reduce((a, b, i) => a + Q[i].o[b][1], 0);
+        const r = s <= 5 ? R.prima : s <= 11 ? R.achtung : R.vorsicht;
+        qEl.innerHTML = '<div class="quiz-result ' + r.cls + '"><div class="rh"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + r.ic + '</svg></div><h3>' + r.t + '</h3><p>' + r.p + '</p><div class="cta-row" style="justify-content:center"><a class="btn btn-primary" href="/terminanfrage">Beratungstermin vereinbaren</a><button class="btn btn-ghost" id="qReset">Test wiederholen</button></div></div>';
+        const rs = document.getElementById('qReset'); if (rs) rs.addEventListener('click', () => { idx = 0; ans = new Array(Q.length).fill(null); render(); });
+      }
+      render();
+    })();
+  </script>
+</BaseLayout>

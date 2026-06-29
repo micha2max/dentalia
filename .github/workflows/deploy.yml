@@ -1,0 +1,49 @@
+name: Build & Deploy to Hostinger VPS
+
+# Auto-deploy on every push to main (incl. content edits committed by Sveltia CMS),
+# plus a manual "Run workflow" button. Builds the static site and rsyncs dist/ to
+# the VPS webroot over SSH.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   SSH_HOST   – VPS IP or hostname
+#   SSH_USER   – deploy user (must own /var/www/dr-ehrlichmann.de)
+#   SSH_KEY    – private SSH key (the matching public key is in the VPS user's authorized_keys)
+#   SSH_PORT   – (optional) SSH port, defaults to 22
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+      - name: Verify no broken internal links
+        run: node scripts/check-links.mjs
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -p "${{ secrets.SSH_PORT || 22 }}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy (rsync dist/ -> webroot)
+        run: |
+          rsync -az --delete \
+            -e "ssh -p ${{ secrets.SSH_PORT || 22 }} -i ~/.ssh/id_deploy" \
+            dist/ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/dr-ehrlichmann.de/"

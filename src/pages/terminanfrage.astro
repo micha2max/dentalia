@@ -1,0 +1,110 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PraxisInfoCard from '../components/PraxisInfoCard.astro';
+import { praxis } from '../data/site';
+
+const terminarten = [
+  'Kontrolle / Vorsorge',
+  'Professionelle Zahnreinigung',
+  'Schmerzen / akutes Problem',
+  'Beratung Zahnersatz / Implantate',
+  'Beratung Ästhetik / Bleaching',
+  'Kinderbehandlung',
+  'Angstpatient – Erstgespräch',
+  'Sonstiges',
+];
+const zeiten = ['Jederzeit', '08:00–11:00', '11:00–14:00', '14:00–18:30'];
+const description =
+  'Vereinbaren Sie online einen Termin in der Zahnarztpraxis Dr. Natalia Ehrlichmann in Neunkirchen-Seelscheid. Wir melden uns zeitnah mit einem Terminvorschlag.';
+---
+
+<BaseLayout title="Terminanfrage | Zahnarztpraxis Dr. Ehrlichmann" description={description}>
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head" style="max-width:50ch">
+        <span class="eyebrow">Terminanfrage</span>
+        <h1 class="section-title">Termin online anfragen</h1>
+        <p class="section-intro">Füllen Sie das Formular aus – wir melden uns zeitnah mit einem Terminvorschlag. Bei akuten Schmerzen rufen Sie uns bitte direkt an: <a href={praxis.phoneHref} style="color:var(--c700);font-weight:600">{praxis.phone}</a>.</p>
+      </div>
+
+      <div class="form-layout">
+        <div class="form-card">
+          <form method="post" action="/api/terminanfrage" class="praxis-form" data-success="Vielen Dank für Ihre Terminanfrage! Wir melden uns zeitnah bei Ihnen mit einem Terminvorschlag.">
+            <div class="form-hp"><label>Bitte freilassen<input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
+
+            <div class="form-row">
+              <div class="form-field"><label for="vorname">Vorname <span class="req">*</span></label><input id="vorname" name="vorname" type="text" required /></div>
+              <div class="form-field"><label for="nachname">Nachname <span class="req">*</span></label><input id="nachname" name="nachname" type="text" required /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-field"><label for="telefon">Telefon <span class="req">*</span></label><input id="telefon" name="telefon" type="tel" required /></div>
+              <div class="form-field"><label for="email">E-Mail <span class="req">*</span></label><input id="email" name="email" type="email" required /></div>
+            </div>
+            <div class="form-field">
+              <label for="status">Ich bin <span class="req">*</span></label>
+              <select id="status" name="status" required>
+                <option value="">Bitte wählen…</option>
+                <option value="neu">Neupatient/in</option>
+                <option value="bestand">Bestandspatient/in</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="terminart">Grund des Termins <span class="req">*</span></label>
+              <select id="terminart" name="terminart" required>
+                <option value="">Bitte wählen…</option>
+                {terminarten.map((t) => <option value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-field"><label for="datum">Wunschdatum <span class="req">*</span></label><input id="datum" name="datum" type="date" required /></div>
+              <div class="form-field">
+                <label for="uhrzeit">Wunschzeit <span class="req">*</span></label>
+                <select id="uhrzeit" name="uhrzeit" required>{zeiten.map((z) => <option value={z}>{z}</option>)}</select>
+              </div>
+            </div>
+            <div class="form-field"><label for="nachricht">Ihre Nachricht (optional)</label><textarea id="nachricht" name="nachricht" rows="4"></textarea></div>
+
+            <label class="form-consent"><input type="checkbox" name="consent" required /> <span>Ich habe die <a href="/datenschutzerklaerung">Datenschutzerklärung</a> gelesen und stimme zu, dass meine Angaben zur Bearbeitung meiner Anfrage gespeichert und verarbeitet werden. Die Einwilligung kann ich jederzeit widerrufen.</span></label>
+
+            <button class="btn btn-primary" type="submit">Terminanfrage senden</button>
+            <p class="form-status" role="status" aria-live="polite" style="display:none;margin:1.1rem 0 0;color:var(--g600);font-weight:600"></p>
+          </form>
+        </div>
+
+        <aside><PraxisInfoCard /></aside>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.querySelectorAll('.praxis-form').forEach((form) => {
+      const f = form as HTMLFormElement;
+      f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const hp = f.querySelector('input[name="website"]') as HTMLInputElement | null;
+        if (hp && hp.value) return; // honeypot
+        if (!f.reportValidity()) return;
+        const status = f.querySelector('.form-status') as HTMLElement | null;
+        const btn = f.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+        const label = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = 'Wird gesendet…'; }
+        try {
+          const res = await fetch(f.action, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'fetch', Accept: 'application/json' },
+            body: new URLSearchParams(new FormData(f) as any),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) throw new Error(data.error || 'Senden fehlgeschlagen.');
+          Array.from(f.children).forEach((el) => { if (!el.classList.contains('form-status')) (el as HTMLElement).style.display = 'none'; });
+          if (status) { status.style.display = 'block'; status.style.color = 'var(--g600)'; status.textContent = f.dataset.success || 'Vielen Dank!'; }
+        } catch (err) {
+          if (status) { status.style.display = 'block'; status.style.color = '#d65151'; status.textContent = (err instanceof Error ? err.message : 'Senden fehlgeschlagen.') + ' Bitte rufen Sie uns an: 02247 7171.'; }
+          if (btn) { btn.disabled = false; btn.textContent = label || 'Terminanfrage senden'; }
+        }
+      });
+    });
+    const datum = document.getElementById('datum') as HTMLInputElement | null;
+    if (datum) datum.min = new Date().toISOString().split('T')[0];
+  </script>
+</BaseLayout>

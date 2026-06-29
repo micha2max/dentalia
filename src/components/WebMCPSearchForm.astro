@@ -1,0 +1,31 @@
+---
+// Declarative WebMCP search form (required by the Lighthouse webmcp-schema-validity audit).
+---
+<form
+  toolname="search_site_form"
+  tooldescription="Search this dental practice website for pages by keyword and load the results."
+  action="/ratgeber"
+  method="get"
+  class="webmcp-search-form"
+>
+  <label for="webmcp-q">Website durchsuchen</label>
+  <input
+    id="webmcp-q"
+    type="search"
+    name="q"
+    toolparamdescription="The keyword or phrase to search for. Plain text."
+    autocomplete="off"
+  />
+  <button type="submit">Suchen</button>
+</form>
+
+<style>
+  .webmcp-search-form {
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+</style>

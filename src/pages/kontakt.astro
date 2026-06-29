@@ -1,0 +1,180 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PraxisInfoCard from '../components/PraxisInfoCard.astro';
+import ConsentEmbed from '../components/ConsentEmbed.astro';
+import Icon from '../components/Icon.astro';
+import { praxis } from '../data/site';
+
+const description =
+  'Kontakt zur Zahnarztpraxis Dr. Natalia Ehrlichmann in Neunkirchen-Seelscheid: Telefon, E-Mail, Adresse, Öffnungszeiten, Anfahrt und Kontaktformular.';
+
+const canonical = `${praxis.url}/kontakt`;
+
+// Keyless Google-Maps embed (loaded only after consent via <ConsentEmbed>) +
+// a "Route planen" deep link that opens turn-by-turn directions.
+const mapEmbed = `https://maps.google.com/maps?q=${praxis.geo.lat},${praxis.geo.lng}&z=16&output=embed`;
+const routeUrl = `https://www.google.com/maps/dir/?api=1&destination=${praxis.geo.lat},${praxis.geo.lng}`;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  '@id': `${canonical}#contact`,
+  url: canonical,
+  inLanguage: 'de',
+  about: { '@id': `${praxis.url}/#praxis` },
+  hasMap: praxis.maps,
+};
+---
+
+<BaseLayout title="Kontakt | Zahnarztpraxis Dr. Ehrlichmann" description={description}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </Fragment>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head" style="max-width:50ch">
+        <span class="eyebrow">Kontakt</span>
+        <h1 class="section-title">So erreichen Sie uns</h1>
+        <p class="section-intro">Schreiben Sie uns Ihr Anliegen oder rufen Sie uns an. Für eine Terminbuchung nutzen Sie bitte die <a href="/terminanfrage" style="color:var(--c700);font-weight:600">Terminanfrage</a>.</p>
+      </div>
+
+      <div class="form-layout">
+        <div class="form-card">
+          <form method="post" action="/api/kontakt" class="praxis-form" data-success="Vielen Dank für Ihre Nachricht! Wir melden uns so bald wie möglich bei Ihnen.">
+            <div class="form-hp"><label>Bitte freilassen<input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
+            <div class="form-row">
+              <div class="form-field"><label for="vorname">Vorname <span class="req">*</span></label><input id="vorname" name="vorname" type="text" required /></div>
+              <div class="form-field"><label for="nachname">Nachname <span class="req">*</span></label><input id="nachname" name="nachname" type="text" required /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-field"><label for="telefon">Telefon <span class="req">*</span></label><input id="telefon" name="telefon" type="tel" required /></div>
+              <div class="form-field"><label for="email">E-Mail <span class="req">*</span></label><input id="email" name="email" type="email" required /></div>
+            </div>
+            <div class="form-field"><label for="anliegen">Ihr Anliegen <span class="req">*</span></label><textarea id="anliegen" name="anliegen" rows="5" required></textarea></div>
+
+            <label class="form-consent"><input type="checkbox" name="consent" required /> <span>Ich habe die <a href="/datenschutzerklaerung">Datenschutzerklärung</a> gelesen und stimme zu, dass meine Angaben zur Bearbeitung meiner Anfrage gespeichert und verarbeitet werden. Die Einwilligung kann ich jederzeit widerrufen.</span></label>
+
+            <button class="btn btn-primary" type="submit">Nachricht senden</button>
+            <p class="form-status" role="status" aria-live="polite" style="display:none;margin:1.1rem 0 0;color:var(--g600);font-weight:600"></p>
+          </form>
+        </div>
+
+        <aside><PraxisInfoCard /></aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="anfahrt">
+    <div class="wrap">
+      <div class="section-head" style="max-width:52ch">
+        <span class="eyebrow"><Icon name="pin" /> Anfahrt</span>
+        <h2 class="section-title">So finden Sie zu uns</h2>
+        <p class="section-intro">Unsere Praxis liegt zentral in Neunkirchen-Seelscheid an der Zeithstraße&nbsp;117 (B&nbsp;56). Patientenparkplätze stehen direkt auf dem Praxishof bereit.</p>
+      </div>
+
+      <div class="anfahrt-layout">
+        <div class="anfahrt-map">
+          <ConsentEmbed
+            provider="maps"
+            src={mapEmbed}
+            title="Anfahrt zur Zahnarztpraxis Dr. Ehrlichmann"
+            ratio="4 / 3"
+          />
+        </div>
+
+        <div class="anfahrt-info">
+          <p class="anfahrt-address">
+            <Icon name="pin" />
+            <span><b>{praxis.street}</b><br />{praxis.zip} {praxis.city}</span>
+          </p>
+
+          <ul class="anfahrt-list">
+            <li>
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11l1.4-4.1A2 2 0 0 1 8.3 5.5h7.4a2 2 0 0 1 1.9 1.4L19 11M4 11h16M4 11a1 1 0 0 0-1 1v4h2m14-5a1 1 0 0 1 1 1v4h-2M6 16h12M6 16v1.6M18 16v1.6"/><circle cx="7.5" cy="14" r="1"/><circle cx="16.5" cy="14" r="1"/></svg>
+              <div>
+                <b>Mit dem Auto</b>
+                <p>Kostenlose Patientenparkplätze auf dem Hof hinter dem Haus. Hinweis: Auf der Zeithstraße (B&nbsp;56) gilt Parkscheibenpflicht. <a href="/ratgeber/parkplatz">Mehr zum Parkplatz</a></p>
+              </div>
+            </li>
+            <li>
+              <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4.5" width="16" height="12" rx="2"/><path d="M4 11h16M8 4.5v6.5M16 4.5v6.5M7 20.5v-2M17 20.5v-2"/><circle cx="8" cy="14" r=".7"/><circle cx="16" cy="14" r=".7"/></svg>
+              <div>
+                <b>Mit Bus &amp; Bahn</b>
+                <p>Die Praxis ist über verschiedene Busverbindungen zentral in Seelscheid erreichbar.</p>
+              </div>
+            </li>
+          </ul>
+
+          <a class="btn btn-cyan" href={routeUrl} target="_blank" rel="noopener noreferrer">Route planen</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .anfahrt-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: clamp(28px, 4vw, 48px);
+      align-items: start;
+    }
+    .anfahrt-map { min-width: 0; }
+    .anfahrt-map :global(.consent-embed) { margin: 0; }
+    .anfahrt-info { display: flex; flex-direction: column; gap: 1.5rem; }
+    .anfahrt-address {
+      display: flex;
+      gap: 0.7rem;
+      align-items: flex-start;
+      margin: 0;
+      font-size: 1.05rem;
+      color: var(--navy);
+    }
+    .anfahrt-address .ic { width: 22px; height: 22px; color: var(--c600); flex: none; margin-top: 3px; }
+    .anfahrt-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .anfahrt-list li { display: flex; gap: 0.85rem; align-items: flex-start; }
+    .anfahrt-list .ic { width: 24px; height: 24px; color: var(--c600); flex: none; margin-top: 2px; }
+    .anfahrt-list b { display: block; color: var(--navy); margin-bottom: 0.2rem; }
+    .anfahrt-list p { margin: 0; color: var(--muted); font-size: 0.95rem; line-height: 1.55; }
+    .anfahrt-list a { color: var(--c700); text-decoration: underline; }
+    .anfahrt-info .btn { align-self: flex-start; }
+    @media (max-width: 860px) { .anfahrt-layout { grid-template-columns: 1fr; } }
+  </style>
+
+  <script>
+    document.querySelectorAll('.praxis-form').forEach((form) => {
+      const f = form as HTMLFormElement;
+      f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const hp = f.querySelector('input[name="website"]') as HTMLInputElement | null;
+        if (hp && hp.value) return; // honeypot
+        if (!f.reportValidity()) return;
+        const status = f.querySelector('.form-status') as HTMLElement | null;
+        const btn = f.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+        const label = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = 'Wird gesendet…'; }
+        try {
+          const res = await fetch(f.action, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'fetch', Accept: 'application/json' },
+            body: new URLSearchParams(new FormData(f) as any),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) throw new Error(data.error || 'Senden fehlgeschlagen.');
+          Array.from(f.children).forEach((el) => { if (!el.classList.contains('form-status')) (el as HTMLElement).style.display = 'none'; });
+          if (status) { status.style.display = 'block'; status.style.color = 'var(--g600)'; status.textContent = f.dataset.success || 'Vielen Dank!'; }
+        } catch (err) {
+          if (status) { status.style.display = 'block'; status.style.color = '#d65151'; status.textContent = (err instanceof Error ? err.message : 'Senden fehlgeschlagen.') + ' Bitte rufen Sie uns an: 02247 7171.'; }
+          if (btn) { btn.disabled = false; btn.textContent = label || 'Nachricht senden'; }
+        }
+      });
+    });
+  </script>
+</BaseLayout>

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Design-Finish — Symptom-Karten & Hero (Auswahl)</title>
+<style>
+:root{
+  --c50:#e6f7fa; --c100:#cdeef5; --c500:#00bcd4; --c600:#0097ad; --c700:#057a8d;
+  --navy:#2b354b; --navy-deep:#1f2738;
+  --g500:#8bc34a; --g600:#5e8e2c; --gold:#f5a623;
+  --ink:#1f2738; --body:#414b59; --muted:#5b6673; --line:#e7edf1;
+  --sans:"Inter Variable","Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --r-lg:24px; --r-xl:32px;
+  --shadow-sm:0 6px 18px -10px rgba(31,39,56,.22);
+  --shadow-lg:0 40px 80px -30px rgba(31,39,56,.34);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--sans);color:var(--body);background:#f6fafb;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+h1,h2,h3{color:var(--ink);margin:0;letter-spacing:-.01em}
+.wrap{max-width:1200px;margin:0 auto;padding:0 28px}
+.intro{background:var(--navy);color:#fff;padding:34px 0}
+.intro h1{color:#fff;font-size:1.6rem;font-weight:700}
+.intro p{margin:.5rem 0 0;color:#c7d0de;max-width:70ch}
+.intro code{background:rgba(255,255,255,.12);padding:.1em .4em;border-radius:6px;font-size:.9em}
+.block{padding:48px 0;border-bottom:1px solid var(--line)}
+.block > .wrap > h2{font-size:1.35rem;margin-bottom:.3rem}
+.block > .wrap > .hint{color:var(--muted);margin:0 0 28px;font-size:.96rem}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:26px}
+.opt{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow-sm)}
+.opt .tag{display:inline-flex;align-items:center;gap:.5rem;font-weight:800;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--c700);background:var(--c50);padding:.35rem .7rem;border-radius:999px;margin-bottom:.5rem}
+.opt .desc{font-size:.9rem;color:var(--muted);margin:0 0 18px}
+
+/* ---- base symptom card (identical to live site) ---- */
+.scard{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:1.5rem;box-shadow:0 16px 32px -20px rgba(0,188,212,.22);transition:transform .3s var(--ease),box-shadow .3s var(--ease);margin-bottom:16px;display:block}
+.scard:last-child{margin-bottom:0}
+.scard:hover{transform:translateY(-6px);box-shadow:0 26px 46px -24px rgba(0,188,212,.32)}
+.scard .si{width:52px;height:52px;border-radius:15px;background:var(--c50);color:var(--c600);display:grid;place-items:center;margin-bottom:.9rem;transition:background .25s var(--ease),color .25s var(--ease)}
+.scard:hover .si{background:var(--c500);color:#fff}
+.scard .si svg{width:28px;height:28px}
+.scard h3{font-size:1.15rem;margin-bottom:.3rem}
+.scard p{color:var(--muted);font-size:.92rem;margin:0;line-height:1.45}
+
+/* A — diagonal arrow (CURRENT) */
+.v-diag .scard::after{content:"\2197";position:absolute;top:1.05rem;right:1.05rem;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:1.05rem;font-weight:700;line-height:1;color:var(--c600);background:var(--c50);transition:background .25s var(--ease),color .25s var(--ease),transform .3s var(--ease)}
+.v-diag .scard:hover::after{background:var(--c500);color:#fff;transform:translate(3px,-3px)}
+
+/* B — horizontal arrow */
+.v-horiz .scard::after{content:"\2192";position:absolute;top:1.05rem;right:1.05rem;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:1.15rem;font-weight:700;line-height:1;color:var(--c600);background:var(--c50);transition:background .25s var(--ease),color .25s var(--ease),transform .3s var(--ease)}
+.v-horiz .scard:hover::after{background:var(--c500);color:#fff;transform:translateX(4px)}
+
+/* C — text link "ansehen ->" at bottom (no corner badge) */
+.v-text .scard{padding-bottom:1.1rem}
+.v-text .slink{display:inline-flex;align-items:center;gap:.35rem;margin-top:1rem;font-weight:700;font-size:.9rem;color:var(--c700)}
+.v-text .slink::after{content:"\2192";transition:transform .25s var(--ease)}
+.v-text .scard:hover .slink::after{transform:translateX(5px)}
+
+/* D — clean (no affordance, whole card lifts) */
+/* nothing extra */
+
+/* ============ HERO ============ */
+.hero-demo{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+@media(max-width:900px){.hero-demo{grid-template-columns:1fr}}
+.hcol h3{font-size:1rem;color:var(--c700);margin-bottom:14px;text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+.hero-card{background:linear-gradient(135deg,rgba(0,188,212,.10) 0%,#fff 45%,rgba(139,195,74,.10) 100%);border:1px solid var(--line);border-radius:22px;padding:26px}
+.hero-media{position:relative;max-width:330px;margin:0 auto}
+.frame{position:relative;border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-lg);aspect-ratio:4/4.5;background:var(--c50)}
+.frame img{width:100%;height:100%;object-fit:cover;object-position:88% center}
+
+/* refined plashki */
+.chip-rating{position:absolute;left:-18px;bottom:26px;background:rgba(255,255,255,.92);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:14px;padding:.6rem .85rem;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:.5rem}
+.chip-rating .stars{color:var(--gold);font-size:.95rem;letter-spacing:1px}
+.chip-rating b{color:var(--ink);font-size:1.05rem}
+.chip-rating small{color:var(--muted);font-size:.72rem;display:block;line-height:1.1}
+.chip-years{position:absolute;right:-14px;top:24px;background:var(--c700);color:#fff;border-radius:14px;padding:.55rem .8rem;box-shadow:var(--shadow-sm);text-align:center;line-height:1.05}
+.chip-years b{font-size:1.25rem;display:block}
+.chip-years small{font-size:.66rem;letter-spacing:.04em;opacity:.92}
+.chip-lang{position:absolute;left:-10px;top:30px;background:rgba(255,255,255,.92);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:999px;padding:.4rem .8rem;box-shadow:var(--shadow-sm);font-size:.74rem;font-weight:700;color:var(--navy);display:flex;gap:.45rem}
+.chip-lang span{color:var(--c700)}
+.note{font-size:.82rem;color:var(--muted);margin-top:14px;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <div class="wrap">
+    <h1>Design-Finish — bitte aussuchen</h1>
+    <p>Zwei offene Design-Entscheidungen. Fahre mit der Maus über die Karten, um die Hover-Animation zu sehen.
+    Sag mir danach einfach „A / B / C / D&ldquo; (oben) und „clean / mit Plaketten&ldquo; (unten) — oder per Frage im Chat.</p>
+  </div>
+</div>
+
+<!-- ============ 1. SYMPTOM-KARTEN ============ -->
+<section class="block">
+  <div class="wrap">
+    <h2>1 · „Was tut weh?&ldquo; — Affordanz auf den Symptom-Karten</h2>
+    <p class="hint">Womit signalisieren wir „diese Karte ist klickbar&ldquo;? Aktuell ist es das diagonale ↗ (Variante A).</p>
+    <div class="opts">
+
+      <div class="opt v-diag">
+        <span class="tag">A · ↗ diagonal (aktuell)</span>
+        <p class="desc">Pfeil-Badge oben rechts, wandert beim Hover schräg nach außen.</p>
+        <a class="scard" href="#">
+          <div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></div>
+          <h3>Zahnschmerzen</h3><p>Akut oder pochend – wir finden die Ursache.</p>
+        </a>
+        <a class="scard" href="#">
+          <div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.5 4.5 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 2.5-6.5 6-11z"/></svg></div>
+          <h3>Zahnfleischbluten</h3><p>Frühzeichen ernst nehmen – wir helfen.</p>
+        </a>
+      </div>
+
+      <div class="opt v-horiz">
+        <span class="tag">B · → horizontal</span>
+        <p class="desc">Gleiches Badge, aber gerader Pfeil; wandert beim Hover nach rechts. Ruhiger, „Weiterlesen&ldquo;-Gestik.</p>
+        <a class="scard" href="#">
+          <div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></div>
+          <h3>Zahnschmerzen</h3><p>Akut oder pochend – wir finden die Ursache.</p>
+        </a>
+        <a class="scard" href="#">
+          <div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.5 4.5 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 2.5-6.5 6-11z"/></svg></div>
+          <h3>Zahnfleischbluten</h3><p>Frühzeichen ernst nehmen – wir helfen.</p>
+        </a>
+      </div>
+
+      <div class="opt v-text">
+        <span class="tag">C · „ansehen →&ldquo; Text-Link</span>
+        <p class="desc">Kein Eck-Badge. Stattdessen ein klarer Text-Link unten — eindeutigste „klick mich&ldquo;-Geste.</p>
+        <a class="scard" href="#">
+          <div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></div>
+          <h3>Zahnschmerzen</h3><p>Akut oder pochend – wir finden die Ursache.</p>
+          <span class="slink">ansehen</span>
+        </a>
+        <a class="scard" href="#">
+          <div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.5 4.5 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 2.5-6.5 6-11z"/></svg></div>
+          <h3>Zahnfleischbluten</h3><p>Frühzeichen ernst nehmen – wir helfen.</p>
+          <span class="slink">ansehen</span>
+        </a>
+      </div>
+
+      <div class="opt v-clean">
+        <span class="tag">D · clean (ohne)</span>
+        <p class="desc">Gar kein Pfeil. Nur die Karte hebt sich beim Hover. Maximal ruhig/minimalistisch.</p>
+        <a class="scard" href="#">
+          <div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></div>
+          <h3>Zahnschmerzen</h3><p>Akut oder pochend – wir finden die Ursache.</p>
+        </a>
+        <a class="scard" href="#">
+          <div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3.5 4.5 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 2.5-6.5 6-11z"/></svg></div>
+          <h3>Zahnfleischbluten</h3><p>Frühzeichen ernst nehmen – wir helfen.</p>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. HERO ============ -->
+<section class="block" style="border-bottom:none">
+  <div class="wrap">
+    <h2>2 · Hero-Bild — clean oder mit schwebenden Plaketten?</h2>
+    <p class="hint">Die Plaketten (45 Jahre · Sprachen · Google-Sterne) wurden früher entfernt. Hier rechts eine verfeinerte, dezente Version.</p>
+    <div class="hero-demo">
+
+      <div class="hcol">
+        <h3>aktuell · clean</h3>
+        <div class="hero-card">
+          <div class="hero-media">
+            <div class="frame">
+              <img src="https://dr-ehrlichmann.de/wp-content/uploads/2025/11/zahnarztpraxis_neunkirchen-seelscheid_familie.webp" alt="Familie in der Praxis" />
+            </div>
+          </div>
+          <p class="note">Ruhiges, sauberes Bild im gerahmten Rund.</p>
+        </div>
+      </div>
+
+      <div class="hcol">
+        <h3>Variante · mit Plaketten (verfeinert)</h3>
+        <div class="hero-card">
+          <div class="hero-media">
+            <div class="frame">
+              <img src="https://dr-ehrlichmann.de/wp-content/uploads/2025/11/zahnarztpraxis_neunkirchen-seelscheid_familie.webp" alt="Familie in der Praxis" />
+            </div>
+            <div class="chip-years"><b>45</b><small>Jahre</small></div>
+            <div class="chip-lang">DE · <span>RU</span> · EN</div>
+            <div class="chip-rating"><span class="stars">★★★★★</span><span><b>4,8</b><small>26 Google</small></span></div>
+          </div>
+          <p class="note">Drei dezente Glas-Plaketten: Erfahrung, Sprachen, Bewertung.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

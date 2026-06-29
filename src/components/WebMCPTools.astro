@@ -1,0 +1,68 @@
+---
+import { praxis } from '../data/site';
+const NAP = {
+  name: praxis.name,
+  phone: praxis.phone,
+  emergency: praxis.emergency,
+  email: praxis.email,
+  address: `${praxis.street}, ${praxis.zip} ${praxis.city}`,
+  hours: 'Mo, Di, Do 08:00-18:30; Mi, Fr 08:00-13:00',
+  booking: '/terminanfrage',
+};
+---
+<script is:inline define:vars={{ NAP }}>
+  (function () {
+    if (typeof navigator === 'undefined' || !navigator.modelContext) return;
+
+    navigator.modelContext.registerTool({
+      name: 'search_site',
+      description: 'Search this dental practice website by keyword and return up to ten matching pages with title, URL and excerpt.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'Keyword or phrase, plain text.' },
+          limit: { type: 'integer', description: 'Max results, default 5, max 10.', default: 5 },
+        },
+        required: ['query'],
+      },
+      annotations: { readOnlyHint: true },
+      execute: async function (input) {
+        var q = String((input && input.query) || '').trim().toLowerCase();
+        if (!q) return 'No query provided.';
+        var limit = Math.min(parseInt(input && input.limit, 10) || 5, 10);
+        try {
+          var res = await fetch('/search-index.json');
+          if (!res.ok) return 'Search failed with status ' + res.status;
+          var data = await res.json();
+          var items = (data && data.results) || [];
+          var hits = items.filter(function (r) {
+            return (r.title + ' ' + (r.excerpt || '')).toLowerCase().indexOf(q) >= 0;
+          }).slice(0, limit);
+          if (!hits.length) return 'No results for "' + q + '".';
+          return hits.map(function (r) {
+            return '- ' + r.title + ': ' + r.url + (r.excerpt ? ' (' + r.excerpt + ')' : '');
+          }).join('\n');
+        } catch (e) {
+          return 'Search error: ' + e.message;
+        }
+      },
+    });
+
+    navigator.modelContext.registerTool({
+      name: 'get_appointment_info',
+      description: 'Return the dental practice contact details, opening hours and the booking page URL so a user can make an appointment.',
+      inputSchema: { type: 'object', properties: {} },
+      annotations: { readOnlyHint: true },
+      execute: async function () {
+        return [
+          NAP.name,
+          'Adresse: ' + NAP.address,
+          'Telefon: ' + NAP.phone + ' (Notdienst ' + NAP.emergency + ')',
+          'E-Mail: ' + NAP.email,
+          'Öffnungszeiten: ' + NAP.hours,
+          'Termin anfragen: ' + NAP.booking,
+        ].join('\n');
+      },
+    });
+  })();
+</script>

@@ -1,0 +1,80 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { cardImg } from '../../lib/card-image.mjs';
+
+const posts = (await getCollection('ratgeber', (e) => !e.data.draft)).sort(
+  (a, b) => +b.data.date - +a.data.date
+);
+const [feat, ...rest] = posts;
+const themen = [...new Map(posts.map((e) => [e.data.categorySlug, e.data.category])).entries()];
+const title = 'Ratgeber: Zahngesundheit verständlich erklärt | Dr. Ehrlichmann';
+const description =
+  'Verständliche Tipps und Antworten rund um gesunde Zähne, Kinderzähne, Prophylaxe und Zahnarztangst. Von Dr. Natalia Ehrlichmann aus Neunkirchen-Seelscheid.';
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head reveal" style="max-width:46ch">
+        <span class="eyebrow">Wissen &amp; Tipps</span>
+        <h1 class="section-title">Unser Ratgeber</h1>
+        <p class="section-intro">Verständliche Antworten auf die häufigsten Fragen rund um Ihre Zähne – ehrlich und ohne Fachchinesisch.</p>
+      </div>
+
+      <p class="section-intro" id="rg-search-info" hidden style="margin-bottom:1.6rem;font-weight:600"></p>
+
+      <div class="themen reveal" id="rg-themen" style="margin-bottom:2.4rem">
+        <a class="chip" href="/ratgeber">Alle</a>
+        {themen.map(([slug, name]) => <a class="chip" href={`/thema/${slug}`}>{name}</a>)}
+      </div>
+
+      {feat && (
+        <a class="split reveal" data-rg-card data-search={`${feat.data.title} ${feat.data.description} ${feat.data.category}`.toLowerCase()} href={`/ratgeber/${feat.id}`} style="margin-bottom:clamp(2.4rem,4vw,3.4rem);align-items:stretch">
+          <div class="media" style="aspect-ratio:16/11"><img src={feat.data.hero ?? '/wp-content/uploads/2019/01/kinderzahnmedizin.jpg'} alt={feat.data.heroAlt ?? feat.data.title} loading="lazy" /></div>
+          <div style="display:flex;flex-direction:column;justify-content:center">
+            <span class="chip" style="align-self:flex-start;margin-bottom:1rem">{feat.data.category}</span>
+            <h2 class="section-title" style="font-size:clamp(1.7rem,2.8vw,2.4rem)">{feat.data.title}</h2>
+            <p class="section-intro" style="margin-top:.8rem">{feat.data.description}</p>
+            <span class="card-link arrow" style="margin-top:1.2rem;font-size:1rem">Weiterlesen </span>
+          </div>
+        </a>
+      )}
+
+      <div class="blog-grid reveal">
+        {rest.map((p) => (
+          <a class="card" data-rg-card data-search={`${p.data.title} ${p.data.description} ${p.data.category}`.toLowerCase()} href={`/ratgeber/${p.id}`}>
+            <div class="card-media"><img src={cardImg(p.data.hero ?? '/wp-content/uploads/2019/01/kinderzahnmedizin.jpg')} alt={p.data.heroAlt ?? p.data.title} width="750" height="500" loading="lazy" /></div>
+            <div class="card-body"><span class="chip">{p.data.category}</span><h3 class="card-title">{p.data.title}</h3><p class="card-text">{p.data.description}</p><span class="card-link arrow">Weiterlesen </span></div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    // Client-side filter for /ratgeber?q=… — honours the WebMCP search form action
+    // and the JSON-LD SearchAction (both target /ratgeber?q=). No network call.
+    (function () {
+      var raw = new URLSearchParams(location.search).get('q');
+      var q = (raw || '').trim().toLowerCase();
+      if (!q) return;
+      var cards = document.querySelectorAll('[data-rg-card]');
+      var n = 0;
+      cards.forEach(function (c) {
+        var hit = (c.getAttribute('data-search') || '').indexOf(q) !== -1;
+        c.style.display = hit ? '' : 'none';
+        if (hit) n++;
+      });
+      var themen = document.getElementById('rg-themen');
+      if (themen) themen.style.display = 'none';
+      var info = document.getElementById('rg-search-info');
+      if (info) {
+        info.hidden = false;
+        info.textContent = n + (n === 1 ? ' Ergebnis' : ' Ergebnisse') + ' für „' + (raw || '').trim() + '“';
+      }
+      var inp = document.getElementById('webmcp-q');
+      if (inp) inp.value = (raw || '').trim();
+    })();
+  </script>
+</BaseLayout>

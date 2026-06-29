@@ -1,0 +1,308 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { praxis } from '../../data/site';
+import commentsData from '../../data/comments.json';
+import tagsData from '../../data/tags.json';
+import { cardImg } from '../../lib/card-image.mjs';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('ratgeber', (e) => !e.data.draft);
+  return posts.map((entry) => ({ params: { slug: entry.id }, props: { entry, all: posts } }));
+}
+
+const { entry, all } = Astro.props;
+const { Content, headings } = await render(entry);
+const d = entry.data;
+
+const fmtDate = (dt: Date) =>
+  new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'long', year: 'numeric' }).format(dt);
+
+// comments for this post (keyed by WP post id)
+const all_comments: Record<string, any[]> = commentsData as any;
+const postComments = all_comments[String(d.legacyId)] ?? [];
+const top = postComments.filter((c) => c.parent === 0);
+const repliesOf = (id: number) => postComments.filter((c) => c.parent === id);
+const initials = (c: any) => (c.isPraxis ? 'NE' : (c.author?.[0] ?? '?').toUpperCase());
+
+// table of contents from h2 headings (Astro auto-adds slug ids)
+const toc = headings.filter((h) => h.depth === 2);
+
+// related: same Thema first, then fill with most recent
+const sameCat = all.filter((e) => e.id !== entry.id && e.data.categorySlug === d.categorySlug);
+const others = all.filter((e) => e.id !== entry.id && e.data.categorySlug !== d.categorySlug)
+  .sort((a, b) => +b.data.date - +a.data.date);
+const related = [...sameCat, ...others].slice(0, 3);
+
+const popular = [...all].sort((a, b) => +b.data.date - +a.data.date).slice(0, 4);
+const themen = [...new Map(all.map((e) => [e.data.categorySlug, e.data.category])).entries()];
+
+// Schlagwörter (tags) for this post — from src/data/tags.json (keyed by legacyId).
+const tagNames = new Map<string, string>(((tagsData as any).tags as any[]).map((t) => [t.slug, t.name]));
+const postTags = (((tagsData as any).byPost[String(d.legacyId)] ?? []) as string[])
+  .filter((s) => tagNames.has(s))
+  .map((s) => ({ slug: s, name: tagNames.get(s)! }));
+
+// previous / next article by date (newest first): "nächster" = newer, "vorheriger" = older
+const byDate = [...all].sort((a, b) => +b.data.date - +a.data.date);
+const navIdx = byDate.findIndex((e) => e.id === entry.id);
+const newerPost = navIdx > 0 ? byDate[navIdx - 1] : null;
+const olderPost = navIdx >= 0 && navIdx < byDate.length - 1 ? byDate[navIdx + 1] : null;
+
+const canonical = new URL(`/ratgeber/${entry.id}`, praxis.url).href;
+
+// "Teilen" links — plain share URLs, NO external scripts (keeps the 0-external invariant).
+const shareU = encodeURIComponent(canonical);
+const shareT = encodeURIComponent(d.title);
+const shareLinks = [
+  { name: 'Facebook', href: `https://www.facebook.com/sharer/sharer.php?u=${shareU}`,
+    path: 'M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z' },
+  { name: 'LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${shareU}`,
+    path: 'M4.98 3.5A2.5 2.5 0 1 1 0 3.5a2.5 2.5 0 0 1 4.98 0zM.5 8h4V24h-4V8zM8 8h3.8v2.2h.05c.53-1 1.83-2.2 3.77-2.2 4.03 0 4.78 2.65 4.78 6.1V24h-4v-7.1c0-1.7-.03-3.9-2.38-3.9-2.38 0-2.75 1.86-2.75 3.78V24H8V8z' },
+  { name: 'X', href: `https://twitter.com/intent/tweet?url=${shareU}&text=${shareT}`,
+    path: 'M18.9 2H22l-7.5 8.6L23 22h-6.8l-5.3-7-6.1 7H1l8-9.2L1 2h7l4.8 6.4L18.9 2zm-2.4 18h1.9L7.6 4H5.6l10.9 16z' },
+  { name: 'WhatsApp', href: `https://wa.me/?text=${shareT}%20${shareU}`,
+    path: 'M.06 24l1.69-6.16A11.87 11.87 0 0 1 .14 11.9C.14 5.34 5.48 0 12.05 0a11.82 11.82 0 0 1 8.41 3.49 11.82 11.82 0 0 1 3.48 8.42c0 6.56-5.34 11.9-11.9 11.9a11.9 11.9 0 0 1-5.69-1.45L.06 24zM6.6 20.13c1.68 1 3.28 1.6 5.44 1.6 5.46 0 9.9-4.43 9.9-9.9 0-5.46-4.44-9.9-9.9-9.9-5.46 0-9.9 4.44-9.9 9.9 0 2.27.66 3.97 1.77 5.75l-1 3.64 3.69-1.09zm10.97-5.4c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.5 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2-1.41.25-.69.25-1.28.18-1.41z' },
+];
+const mailHref = `mailto:?subject=${shareT}&body=${shareU}`;
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'BlogPosting',
+      '@id': `${canonical}#article`,
+      headline: d.title,
+      description: d.description,
+      inLanguage: 'de',
+      datePublished: d.date.toISOString(),
+      dateModified: (d.updated ?? d.date).toISOString(),
+      image: d.hero ? praxis.url + d.hero : undefined,
+      author: { '@type': 'Person', name: d.author, url: `${praxis.url}/praxisteam/dr-natalia-ehrlichmann` },
+      publisher: { '@id': `${praxis.url}/#praxis` },
+      mainEntityOfPage: canonical,
+      articleSection: d.category,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Start', item: praxis.url },
+        { '@type': 'ListItem', position: 2, name: 'Ratgeber', item: `${praxis.url}/ratgeber` },
+        { '@type': 'ListItem', position: 3, name: d.category, item: `${praxis.url}/thema/${d.categorySlug}` },
+        { '@type': 'ListItem', position: 4, name: d.title, item: canonical },
+      ],
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title={`${d.title} | Dr. Ehrlichmann`}
+  description={d.description}
+  ogImage={d.hero ? praxis.url + d.hero : undefined}
+>
+  <Fragment slot="head">
+    <meta property="og:type" content="article" />
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </Fragment>
+
+  <div class="article">
+    <div class="article-layout">
+      <!-- MAIN -->
+      <article class="article-main">
+        <div class="breadcrumb"><a href="/">Start</a> › <a href="/ratgeber">Ratgeber</a> › <a href={`/thema/${d.categorySlug}`}>{d.category}</a></div>
+        <span class="chip">{d.category}</span>
+        <h1>{d.title}</h1>
+        <div class="byline">
+          <span class="avatar"><img src="/wp-content/uploads/2021/02/zahnarzt-ehrlichmann-seelscheid.jpg" alt={d.author} width="48" height="48" /></span>
+          <span>Von <b>{d.author}</b> · Aktualisiert am {fmtDate(d.updated ?? d.date)} · {d.readingTime}</span>
+        </div>
+
+        {d.hero && <img class="lead" src={d.hero} alt={d.heroAlt ?? d.title} width="1140" height="641" loading="eager" fetchpriority="high" decoding="async" />}
+
+        <div class="article-body">
+          <Content />
+        </div>
+
+        {postTags.length > 0 && (
+          <div class="article-tags">
+            <span class="at-label">Schlagwörter</span>
+            <div class="at-list">
+              {postTags.map((t) => <a class="chip" href={`/schlagwort/${t.slug}`}>{t.name}</a>)}
+            </div>
+          </div>
+        )}
+
+        <div class="share" aria-label="Diesen Beitrag teilen">
+          <span class="share-label">Beitrag teilen</span>
+          <div class="share-row">
+            {shareLinks.map((s) => (
+              <a class="share-btn" href={s.href} target="_blank" rel="noopener noreferrer" aria-label={`Bei ${s.name} teilen`} title={`Bei ${s.name} teilen`}>
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d={s.path} /></svg>
+              </a>
+            ))}
+            <a class="share-btn" href={mailHref} aria-label="Per E-Mail teilen" title="Per E-Mail teilen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+            </a>
+          </div>
+        </div>
+
+        {(olderPost || newerPost) && (
+          <nav class="post-nav" aria-label="Weitere Beiträge">
+            {olderPost ? (
+              <a class="post-nav-link prev" href={`/ratgeber/${olderPost.id}`} rel="prev">
+                <span class="pn-dir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg> Vorheriger Beitrag</span>
+                <span class="pn-title">{olderPost.data.title}</span>
+              </a>
+            ) : <span class="post-nav-link empty" aria-hidden="true"></span>}
+            {newerPost ? (
+              <a class="post-nav-link next" href={`/ratgeber/${newerPost.id}`} rel="next">
+                <span class="pn-dir">Nächster Beitrag <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></span>
+                <span class="pn-title">{newerPost.data.title}</span>
+              </a>
+            ) : <span class="post-nav-link empty" aria-hidden="true"></span>}
+          </nav>
+        )}
+
+        <section class="related">
+          <h2>Das könnte Sie auch interessieren</h2>
+          <div class="related-grid">
+            {related.map((r) => (
+              <a class="related-card" href={`/ratgeber/${r.id}`}>
+                <div class="rm"><img src={cardImg(r.data.hero ?? '/wp-content/uploads/2019/01/kinderzahnmedizin.jpg')} alt={r.data.heroAlt ?? r.data.title} loading="lazy" /></div>
+                <div class="rb"><small>{r.data.category}</small><h3>{r.data.title}</h3></div>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <!-- comments -->
+        <section class="comments">
+          <h2>Fragen &amp; Antworten</h2>
+          <p class="sub">Echte Fragen von Patientinnen und Patienten – persönlich beantwortet von Dr. Ehrlichmann.</p>
+          {postComments.length > 0 && <span class="migrated-note"><Icon name="chat" size={14} /> Vom bisherigen Praxis-Blog übernommen</span>}
+
+          {top.map((c) => (
+            <>
+              <div class="comment">
+                <div class="c-av">{initials(c)}</div>
+                <div>
+                  <div class="c-head"><b>{c.author}</b>{c.isPraxis && <span class="role">Praxis</span>}<time>{fmtDate(new Date(c.date))}</time></div>
+                  <p>{c.text}</p>
+                </div>
+              </div>
+              {repliesOf(c.id).map((r) => (
+                <div class="comment reply">
+                  <div class="c-av">{initials(r)}</div>
+                  <div>
+                    <div class="c-head"><b>{r.author}</b>{r.isPraxis && <span class="role">Praxis</span>}<time>{fmtDate(new Date(r.date))}</time></div>
+                    <p>{r.text}</p>
+                  </div>
+                </div>
+              ))}
+            </>
+          ))}
+
+          <form class="comment-form" method="post" action="/api/kommentar">
+            <h3>Ihre Frage stellen</h3>
+            <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true" />
+            <input type="hidden" name="post" value={entry.id} />
+            <div class="field-row">
+              <div><label for="cn">Name</label><input id="cn" name="name" type="text" placeholder="Ihr Vorname" required /></div>
+              <div><label for="ce">E-Mail (wird nicht veröffentlicht)</label><input id="ce" name="email" type="email" placeholder="name@beispiel.de" required /></div>
+            </div>
+            <label for="cm">Ihre Frage</label>
+            <textarea id="cm" name="frage" rows="4" placeholder="Was möchten Sie Dr. Ehrlichmann fragen?" required></textarea>
+            <label class="consent"><input type="checkbox" name="consent" required /> Ich habe die <a href="/datenschutzerklaerung">Datenschutzerklärung</a> gelesen und bin einverstanden, dass meine Angaben zur Beantwortung gespeichert werden.</label>
+            <button class="btn btn-primary" type="submit">Frage absenden</button>
+          </form>
+        </section>
+      </article>
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        {toc.length > 1 && (
+          <div class="widget">
+            <h2 class="widget-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg> Inhaltsverzeichnis</h2>
+            <nav class="toc" aria-label="Inhaltsverzeichnis">
+              {toc.map((h) => <a href={`#${h.slug}`}>{h.text}</a>)}
+            </nav>
+          </div>
+        )}
+
+        <div class="widget hours-w">
+          <h2 class="widget-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Öffnungszeiten</h2>
+          <div class="open-line">Heute geöffnet bis 18:30 Uhr</div>
+          {praxis.hours.map((h) => <div class="row"><span>{h.days}</span><b>{h.time}</b></div>)}
+        </div>
+
+        <div class="widget">
+          <h2 class="widget-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3zM7 16v4"/></svg> Beliebte Artikel</h2>
+          <div class="pop">
+            {popular.map((r) => (
+              <a href={`/ratgeber/${r.id}`}><span class="thumb"><img src={cardImg(r.data.hero ?? '/wp-content/uploads/2019/01/kinderzahnmedizin.jpg')} alt={r.data.title} loading="lazy" /></span><div><span class="pop-t">{r.data.title}</span><small>{r.data.category}</small></div></a>
+            ))}
+          </div>
+        </div>
+
+        <div class="widget">
+          <h2 class="widget-title"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 11 3.8A2 2 0 0 0 9.6 3H4v5.6a2 2 0 0 0 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l3.6-3.6a2 2 0 0 0 0-2.6zM7 7h.01"/></svg> Themen</h2>
+          <div class="themen">
+            {themen.map(([slug, name]) => <a class="chip" href={`/thema/${slug}`}>{name}</a>)}
+          </div>
+        </div>
+
+        <div class="widget cta-w">
+          <div class="wic"><Icon name="calendar" size={26} /></div>
+          <h2>Haben Sie Fragen?</h2>
+          <p>Vereinbaren Sie unkompliziert einen Termin in unserer Praxis.</p>
+          <a class="num" href={praxis.phoneHref}>{praxis.phone}</a>
+          <a class="btn btn-primary" href="/terminanfrage">Termin vereinbaren</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <section class="cta-band" style="margin-top:80px">
+    <div class="wrap">
+      <h2>Beschwerden? Wir helfen schnell.</h2>
+      <p>Vereinbaren Sie einen Termin in Ihrer Zahnarztpraxis in Neunkirchen-Seelscheid.</p>
+      <div class="cta-row"><a class="btn btn-primary" href="/terminanfrage">Termin anfragen</a><a class="btn btn-light" href={praxis.phoneHref}>{praxis.phone}</a></div>
+    </div>
+  </section>
+
+  <script>import '../../scripts/article-lightbox.js';</script>
+  <script>import '../../scripts/quiz.js';</script>
+
+  <script>
+    // Reader-question form -> /api/kommentar (moderated). Progressive enhancement:
+    // a real fetch with an in-page thank-you; falls back to a native POST without JS.
+    document.querySelectorAll('.comment-form').forEach((form) => {
+      const f = form as HTMLFormElement;
+      f.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const hp = f.querySelector('input[name="website"]') as HTMLInputElement | null;
+        if (hp && hp.value) return; // honeypot
+        if (!f.reportValidity()) return;
+        const btn = f.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+        const label = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = 'Wird gesendet…'; }
+        try {
+          const res = await fetch(f.action, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'fetch', Accept: 'application/json' },
+            body: new URLSearchParams(new FormData(f) as any),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.ok) throw new Error(data.error || 'Senden fehlgeschlagen.');
+          f.innerHTML = '<p role="status" style="margin:0;color:var(--g600);font-weight:600">Vielen Dank! Ihre Frage wird von unserem Team geprüft und nach Freigabe hier beantwortet.</p>';
+        } catch (err) {
+          let s = f.querySelector('.comment-status') as HTMLElement | null;
+          if (!s) { s = document.createElement('p'); s.className = 'comment-status'; s.setAttribute('role', 'status'); s.style.cssText = 'margin:.8rem 0 0;font-weight:600;color:#d65151'; f.appendChild(s); }
+          s.textContent = (err instanceof Error ? err.message : 'Senden fehlgeschlagen.') + ' Bitte rufen Sie uns an: 02247 7171.';
+          if (btn) { btn.disabled = false; btn.textContent = label || 'Frage absenden'; }
+        }
+      });
+    });
+  </script>
+</BaseLayout>

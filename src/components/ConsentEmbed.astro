@@ -1,0 +1,29 @@
+---
+// Consent-gated embed (self-hosted "2-Klick-Lösung", iubenda-Verhalten ohne SaaS).
+// External content (YouTube/Vimeo/Google Maps) is NOT loaded until the visitor
+// explicitly consents. The choice is stored locally (localStorage), so it can be
+// withdrawn any time and nothing is transmitted to third parties beforehand.
+//
+// Markup is built by the shared lib so component- and Markdown-generated embeds
+// are identical; styles live in global.css (.consent-embed/.ce-*) and the
+// controller runs once globally from BaseLayout.
+//
+// Usage in .astro pages:
+//   <ConsentEmbed provider="youtube" id="mZ_Qgz_ztT8" title="Zahnarztangst verstehen" />
+//   <ConsentEmbed provider="vimeo"   id="802074854" title="Mundgeruch" />
+//   <ConsentEmbed provider="maps"    src="https://maps.google.com/maps?q=50.870085,7.323114&z=16&output=embed" title="Anfahrt zur Praxis" />
+import { consentEmbedHTML } from '../lib/consent-embed.mjs';
+
+interface Props {
+  provider?: 'youtube' | 'vimeo' | 'maps';
+  id?: string;
+  src?: string;
+  title: string;
+  thumb?: string;
+  ratio?: string; // e.g. "16 / 9" (video) or "4 / 3" (map)
+}
+const { provider = 'youtube', id = '', src = '', title, thumb = '', ratio = '' } = Astro.props;
+const html = consentEmbedHTML({ provider, id, src, title, thumb, ratio });
+---
+
+<Fragment set:html={html} />
