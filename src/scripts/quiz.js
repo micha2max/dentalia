@@ -27,7 +27,7 @@ function initQuiz(root, def) {
       `<div class="quiz-body"><div class="quiz-step">Frage ${idx + 1} von ${Q.length}</div>` +
       `<div class="quiz-q">${esc(q.q)}</div><div class="quiz-options">${opts}</div>` +
       `<div class="quiz-nav"><button type="button" class="btn btn-ghost" data-prev${idx === 0 ? ' style="visibility:hidden"' : ''}>Zurück</button>` +
-      `<button type="button" class="btn btn-primary" data-next${ans[idx] === null ? ' disabled style="opacity:.5;cursor:not-allowed"' : ''}>${idx === Q.length - 1 ? 'Ergebnis' : 'Weiter'}</button></div></div>`;
+      `<button type="button" class="btn btn-primary" data-next${ans[idx] === null ? ' disabled' : ''}>${idx === Q.length - 1 ? 'Ergebnis' : 'Weiter'}</button></div></div>`;
     el.querySelectorAll('.quiz-opt').forEach((b) =>
       b.addEventListener('click', () => { ans[idx] = +b.dataset.i; render(); })
     );

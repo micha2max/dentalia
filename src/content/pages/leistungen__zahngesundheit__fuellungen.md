@@ -18,13 +18,9 @@ Manchmal entstehen, trotz bester Bemühungen beim Zähneputzen und regelmäßige
 
 [Terminanfrage](/terminanfrage)
 
-<figure class="align-center"><img src="/wp-content/uploads/2019/02/fuellung_vorher.jpg" alt="Zahnkrone rausgefallen was tun?" loading="lazy" decoding="async"></figure>
+<div class="ba" style="--ba:50%"><img src="/wp-content/uploads/2019/02/fuellung_nachher.jpg" alt="Die neuen Zähne sehen schick aus" width="1170" height="780" loading="lazy" decoding="async"><img class="ba-top" src="/wp-content/uploads/2019/02/fuellung_vorher.jpg" alt="Zähne vor der Füllungsbehandlung" width="1170" height="780" loading="lazy" decoding="async"><span class="ba-line" aria-hidden="true"></span><span class="ba-grip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l-5 6 5 6M15 6l5 6-5 6"/></svg></span><span class="ba-tag ba-tag--v">Vorher</span><span class="ba-tag ba-tag--n">Nachher</span><input type="range" class="ba-range" min="0" max="100" value="50" aria-label="Vorher-Nachher-Vergleich: Regler mit Maus oder Pfeiltasten verschieben"></div>
 
-
-
-<figure class="align-center"><img src="/wp-content/uploads/2019/02/fuellung_nachher.jpg" alt="Die neue Zähne sehen schick aus!" loading="lazy" decoding="async"></figure>
-
-Die Zähne vor- und nach der Behandlung
+<p class="ba-cap">Die Zähne vor und nach der Behandlung – ziehen Sie den Regler</p>
 
 ## Gesunde Zähne
 

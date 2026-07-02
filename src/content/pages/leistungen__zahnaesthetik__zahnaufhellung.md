@@ -17,13 +17,9 @@ Ein Lächeln sagt mehr als tausend Worte. Die Zähne haben mehr Einfluss auf Ihr
 
 Dafür gibt es viele Ursachen. Die häufigste Ursache ist der Konsum von Farbstoffen in Nahrungsmitteln und Getränken wie z.B. Kaffee, Tee, Wein oder Limonade. Auch das Rauchen, Einnahme von bestimmten Medikamenten (z.B. Tetracyclin). Zähne können auch durch verwendetes Füllungsmaterialien z.B. Amalgam gräulich dunkel erscheinen. Wurzelgefüllte Zähne oder Zähne mit abgestorbenen Zahnnerven (z.B. nach Unfällen) erscheinen ebenfalls oftmals dunkel. Zähne können auch von innen her dunkel erscheinen. Zum einen kann es an einer natürlich dunkeln Zahnfarbe liegen. Zum anderen Zähne werden auf natürliche Weise mit zunehmendem Alter dunkler. Nichtsdestotrotz kann man auch solche Zähne aufhellen.
 
-<figure class="align-center"><img src="/wp-content/uploads/2019/01/bleaching_vorher.jpg" alt="Zahnaufhellung Vorher" loading="lazy" decoding="async"></figure>
+<div class="ba" style="--ba:50%"><img src="/wp-content/uploads/2019/01/bleaching_nacher.jpg" alt="Zahnaufhellung Nachher" width="1920" height="1280" loading="lazy" decoding="async"><img class="ba-top" src="/wp-content/uploads/2019/01/bleaching_vorher.jpg" alt="Zahnaufhellung Vorher" width="1920" height="1280" loading="lazy" decoding="async"><span class="ba-line" aria-hidden="true"></span><span class="ba-grip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l-5 6 5 6M15 6l5 6-5 6"/></svg></span><span class="ba-tag ba-tag--v">Vorher</span><span class="ba-tag ba-tag--n">Nachher</span><input type="range" class="ba-range" min="0" max="100" value="50" aria-label="Vorher-Nachher-Vergleich: Regler mit Maus oder Pfeiltasten verschieben"></div>
 
-Vorher
-
-<figure class="align-center"><img src="/wp-content/uploads/2019/01/bleaching_nacher.jpg" alt="Zahnaufhellung Nachher" loading="lazy" decoding="async"></figure>
-
-Nachher
+<p class="ba-cap">So kann eine Zahnaufhellung wirken – ziehen Sie den Regler</p>
 
 > Schöne Zähne symbolisieren nicht nur Jugend und Gesundheit. Studien weisen darauf hin, dass ein perfektes Gebiss auch über die Karrierechancen mitentscheiden kann und auf das andere Geschlecht besonders anziehend wirkt. So kommt eine Untersuchung des Kings College in London zu dem Ergebnis, dass Menschen mit gleichmäßigen, weißen Zähnen als intelligenter, beliebter und attraktiver eingestuft werden als solche mit schiefen und verfärbten. Eine weitere Studie bestätigt in einem ähnlichen Vergleich, wie wichtig es ist, dass die Zahnfarbe möglichst weiß ist..
 >

@@ -50,7 +50,7 @@ const schema = {
       </div>
 
       <div class="themen reveal" style="margin-bottom:2.4rem">
-        {allTags.map(([s, n]) => <a class="chip" href={`/schlagwort/${s}`} style={s === slug ? 'background:var(--c500);color:#fff' : ''}>{n}</a>)}
+        {allTags.map(([s, n]) => <a class="chip" href={`/schlagwort/${s}`} aria-current={s === slug ? 'page' : undefined} style={s === slug ? 'background:var(--c700);color:#fff' : ''}>{n}</a>)}
       </div>
 
       <div class="blog-grid reveal">

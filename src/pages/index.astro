@@ -251,15 +251,15 @@ const faqSchema = {
   <section class="section alt" id="bewertungen">
     <div class="wrap">
       <div class="reviews-head reveal"><span class="eyebrow">Bewertungen</span><h2 class="section-title">Das sagen unsere Patienten</h2><div class="reviews-score"><span class="stars" style="font-size:1.4rem">★★★★★</span><span class="score">4,8</span><span class="meta"><strong style="color:var(--ink)">Sehr gut</strong><small>aus 27&nbsp;Google-Bewertungen</small></span></div></div>
-      <div class="review-rail reveal" role="list">
+      <div class="review-rail reveal" role="list" tabindex="0" aria-label="Patientenbewertungen, seitlich scrollbar">
         {reviews.map((r) => (
           <article class="review" role="listitem">
             <div class="r-top">
               <span class="stars" aria-label={`${r.rating} von 5 Sternen`}>{'★'.repeat(r.rating)}</span>
               {r.source === 'facebook' ? (
-                <span class="r-src fb" title="Facebook-Bewertung" aria-label="Quelle: Facebook"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg></span>
+                <span class="r-src fb" role="img" title="Facebook-Bewertung" aria-label="Quelle: Facebook"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg></span>
               ) : (
-                <span class="r-src gg" title="Google-Bewertung" aria-label="Quelle: Google"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.66-.06-1.29-.17-1.9H12v3.6h5.38a4.6 4.6 0 0 1-2 3.02v2.5h3.23c1.89-1.74 2.99-4.3 2.99-7.22z"/><path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.43l-3.23-2.5c-.9.6-2.05.95-3.39.95-2.6 0-4.8-1.76-5.59-4.12H3.07v2.59A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.41 13.9a6 6 0 0 1 0-3.8V7.51H3.07a10 10 0 0 0 0 8.98l3.34-2.59z"/><path fill="#EA4335" d="M12 5.98c1.47 0 2.79.5 3.83 1.5l2.86-2.86A10 10 0 0 0 12 2 10 10 0 0 0 3.07 7.51l3.34 2.59C7.2 7.74 9.4 5.98 12 5.98z"/></svg></span>
+                <span class="r-src gg" role="img" title="Google-Bewertung" aria-label="Quelle: Google"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.23c0-.66-.06-1.29-.17-1.9H12v3.6h5.38a4.6 4.6 0 0 1-2 3.02v2.5h3.23c1.89-1.74 2.99-4.3 2.99-7.22z"/><path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.43l-3.23-2.5c-.9.6-2.05.95-3.39.95-2.6 0-4.8-1.76-5.59-4.12H3.07v2.59A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.41 13.9a6 6 0 0 1 0-3.8V7.51H3.07a10 10 0 0 0 0 8.98l3.34-2.59z"/><path fill="#EA4335" d="M12 5.98c1.47 0 2.79.5 3.83 1.5l2.86-2.86A10 10 0 0 0 12 2 10 10 0 0 0 3.07 7.51l3.34 2.59C7.2 7.74 9.4 5.98 12 5.98z"/></svg></span>
               )}
             </div>
             <p>„{r.text}“</p>
@@ -349,7 +349,7 @@ const faqSchema = {
           '<div class="quiz-top"><h3>Zahngesundheits-Test</h3><p>Einfach ehrlich beantworten – am Ende sehen Sie das Ergebnis.</p></div>' +
           '<div class="quiz-bar"><i style="width:' + pct + '%"></i></div>' +
           '<div class="quiz-body"><div class="quiz-step">Frage ' + (idx + 1) + ' von ' + Q.length + '</div><div class="quiz-q">' + q.q + '</div><div class="quiz-options">' + opts + '</div>' +
-          '<div class="quiz-nav"><button class="btn btn-ghost" id="qPrev"' + (idx === 0 ? ' style="visibility:hidden"' : '') + '>Zurück</button><button class="btn btn-primary" id="qNext"' + (ans[idx] === null ? ' disabled style="opacity:.5;cursor:not-allowed"' : '') + '>' + (idx === Q.length - 1 ? 'Ergebnis' : 'Weiter') + '</button></div></div>';
+          '<div class="quiz-nav"><button class="btn btn-ghost" id="qPrev"' + (idx === 0 ? ' style="visibility:hidden"' : '') + '>Zurück</button><button class="btn btn-primary" id="qNext"' + (ans[idx] === null ? ' disabled' : '') + '>' + (idx === Q.length - 1 ? 'Ergebnis' : 'Weiter') + '</button></div></div>';
         qEl.querySelectorAll('.quiz-opt').forEach((b) => b.addEventListener('click', () => { ans[idx] = +(b.dataset.i || 0); render(); }));
         const pv = document.getElementById('qPrev'); if (pv) pv.addEventListener('click', () => { if (idx > 0) { idx--; render(); } });
         const nx = document.getElementById('qNext'); if (nx) nx.addEventListener('click', () => { if (ans[idx] === null) return; if (idx < Q.length - 1) { idx++; render(); } else result(); });

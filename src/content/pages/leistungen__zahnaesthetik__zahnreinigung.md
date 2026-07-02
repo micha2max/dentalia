@@ -10,13 +10,9 @@ legacyId: 3027
 
 ## Die professionelle Zahnreinigung
 
-<figure class="align-center"><img src="/wp-content/uploads/2019/01/bleaching_vorher.jpg" alt="Zahnaufhellung Vorher" loading="lazy" decoding="async"></figure>
+<div class="ba" style="--ba:50%"><img src="/wp-content/uploads/2019/01/bleaching_nacher.jpg" alt="Zahnreinigung Nachher" width="1920" height="1280" loading="lazy" decoding="async"><img class="ba-top" src="/wp-content/uploads/2019/01/bleaching_vorher.jpg" alt="Zahnreinigung Vorher" width="1920" height="1280" loading="lazy" decoding="async"><span class="ba-line" aria-hidden="true"></span><span class="ba-grip" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l-5 6 5 6M15 6l5 6-5 6"/></svg></span><span class="ba-tag ba-tag--v">Vorher</span><span class="ba-tag ba-tag--n">Nachher</span><input type="range" class="ba-range" min="0" max="100" value="50" aria-label="Vorher-Nachher-Vergleich: Regler mit Maus oder Pfeiltasten verschieben"></div>
 
-
-
-<figure class="align-center"><img src="/wp-content/uploads/2019/01/bleaching_nacher.jpg" alt="Zahnaufhellung Nachher" loading="lazy" decoding="async"></figure>
-
-Beispiel einer möglichen Behandlung
+<p class="ba-cap">Beispiel einer möglichen Behandlung – ziehen Sie den Regler</p>
 
 In unserer [Zahnarztpraxis in Neunkirchen-Seelscheid](/) bieten wir Ihnen ein professionelles Prophylaxeprogramm. Mit feinen Handinstrumenten reinigen wir Ihre Zähne zunächst gründlich und befreien sie dann von bakteriellen Zahnbelägen und Zahnstein. Anschließend werden Ihre Zähne auf Hochglanz poliert und die Zähne fluoridiert. Das schützt die Zähne vor den Säureangriffen der Mundbakterien.
 
